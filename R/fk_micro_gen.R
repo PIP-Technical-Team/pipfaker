@@ -1,0 +1,112 @@
+#' Fake data generator
+#'
+#' @param pip_inventory
+#'
+#' @return
+#' @export
+#'
+#' @examples
+fk_micro_gen <- function(pip_inventory) {
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Select sample of surveys   ---------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  gpwg <- pip_inventory[pip_inventory$source=="GPWG",]
+
+  gpwg_tst <- gpwg[sample(1:nrow(gpwg), 20, replace=FALSE),]
+
+  svy_tst <- lapply(gpwg_tst$orig, haven::read_dta) # create function for this
+
+  names(svy_tst) <- basename(gpwg_tst$survey_id)
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Variables with unique values   ---------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  var_uniq <- c(0)
+
+  for(j in 1:length(svy_tst[[1]])){
+    uniq <- dplyr::n_distinct(svy_tst[[1]][j])
+    if(uniq==1){
+      var_uniq <- cbind(var_uniq,unique(svy_tst[[1]][j]))
+    }
+  }
+  var_uniq <- var_uniq[-1]
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Create new dataset   ---------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  n_obs <- collapse::rapply2d(svy_tst, nrow)
+
+  av_n_obs <- round(collapse::fmean(collapse::unlist2d(n_obs)$V1))
+
+  fake_svy <- var_uniq[rep(1,each=av_n_obs),]
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Household and Person ID   ---------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  n_hh <- round(av_n_obs/2)
+
+  n_id_hh <- round(rpois(n_hh, 2))
+
+  n_id_hh <- rep(n_id_hh[n_id_hh!=0],4)
+
+  fake_svy$hhid <- rep(1:n_hh,times = n_id_hh[1:n_hh])[1:av_n_obs]
+
+  data.table::setDT(fake_svy)
+
+  fake_svy <- fake_svy|>
+    group_by(hhid)|>
+    mutate(pid = row_number())|>
+    ungroup()
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Gender and Area   ---------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+  if(!("gender" %in% names(fake_svy))){
+    fake_svy$gender = sample(c("male","female"),
+                             nrow(fake_svy),
+                             prob=c(0.5,0.5),
+                             replace =TRUE)
+  }
+
+  if(!("area" %in% names(fake_svy))){
+    fake_svy <- fake_svy|>
+      group_by(hhid)|>
+      mutate(area = sample(c("urban","rural"), 1,
+                           prob = c(0.3,0.7)))
+  }
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Wealth and Weight   ---------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  lw_vec_all <- c(0)
+
+  for(j in 2:length(svy_tst)){
+    w_vec <- svy_tst[[j]]$welfare[!is.na(svy_tst[[j]]$welfare)]
+    lw_vec <- log(w_vec + 1 + abs(min(w_vec)))
+    lw_vec_sc <- scale(lw_vec)
+    lw_vec_smp <- sample(lw_vec_sc, 100, replace = TRUE)
+    lw_vec_all <- rbind(lw_vec_all, lw_vec_smp)
+  }
+
+  lw_vec_all <- lw_vec_all[-1]
+  w_vec_all <- exp(lw_vec_all)
+
+  min_svy <- lapply(svy_tst, function(x) min(x$welfare[!is.na(x$welfare)]))
+  w_vec_all <- w_vec_all + 1 + abs(mean(unlist(min_svy)))
+
+  fake_svy$welfare <- sample(w_vec_all,av_n_obs,replace = TRUE)
+  fake_svy$weight <- 1/av_n_obs
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Return   ---------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  return(fake_svy)
+
+}
