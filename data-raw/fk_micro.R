@@ -3,13 +3,13 @@
 library(dplyr)
 library(data.table)
 
-# Load pip_invetory
+# Load pip_inventory (needs access to Y Drive)
 
-# pip_inventory <-
-#   pipload::pip_find_data(
-#     inv_file = "//w1wbgencifs01/pip/PIP-Data_QA/_inventory/inventory.fst",
-#     filter_to_pc = TRUE,
-#     maindir = "//w1wbgencifs01/pip/PIP-Data_QA/")
+pip_inventory <-
+  pipload::pip_find_data(
+    inv_file = "//w1wbgencifs01/pip/PIP-Data_QA/_inventory/inventory.fst",
+    filter_to_pc = TRUE,
+    maindir = "//w1wbgencifs01/pip/PIP-Data_QA/")
 
 # Generate micro data
 

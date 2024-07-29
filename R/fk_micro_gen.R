@@ -12,7 +12,7 @@ fk_micro_gen <- function(pip_inventory) {
 
   gpwg_tst <- gpwg[sample(1:nrow(gpwg), 20, replace=FALSE),]
 
-  svy_tst <- lapply(gpwg_tst$orig, haven::read_dta) # create function for this
+  svy_tst <- load_files_pip(gpwg_tst$orig)
 
   names(svy_tst) <- basename(gpwg_tst$survey_id)
 
