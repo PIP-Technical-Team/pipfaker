@@ -59,6 +59,8 @@ fk_micro_gen <- function(pip_inventory) {
     mutate(pid = row_number())|>
     ungroup()
 
+  n_hh <- n_distinct(fake_svy$hhid)
+
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Gender and Area   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -98,7 +100,13 @@ fk_micro_gen <- function(pip_inventory) {
   min_svy <- lapply(svy_tst, function(x) min(x$welfare[!is.na(x$welfare)]))
   w_vec_all <- w_vec_all + 1 + abs(mean(unlist(min_svy)))
 
-  fake_svy$welfare <- sample(w_vec_all,av_n_obs,replace = TRUE)
+  w_vec_smp <- data.frame(hhid = c(1:n_hh),
+                          welfare = sample(w_vec_all,n_hh,replace = TRUE))
+  fake_svy <- joyn::joyn(fake_svy, w_vec_smp,
+                    by = "hhid",
+                    match_type = "m:1",
+                    reportvar = FALSE,
+                    verbose = FALSE)
   fake_svy$weight <- 1/av_n_obs
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
