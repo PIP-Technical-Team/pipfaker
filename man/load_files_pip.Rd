@@ -7,7 +7,7 @@
 load_files_pip(orig_file)
 }
 \arguments{
-\item{orig_file:}{a vector of file addresses
+\item{orig_file}{a vector of file addresses
 (usually `orig` variable from `pip_inventory`)}
 }
 \value{

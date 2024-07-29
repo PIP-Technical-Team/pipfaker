@@ -8,6 +8,7 @@
 A data frame with 20 variables:
 \describe{
   \item{country_code}{Three letter country code}
+  \item{survey_year}{Year of the survey}
   \item{surveyid_year}{Year of the survey (already rounded)}
   \item{survey_acronym}{Acronym of the survey (varies by country)}
   \item{hhid}{Household ID}

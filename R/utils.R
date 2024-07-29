@@ -2,7 +2,7 @@
 #' Load and merge data files from PIP drive
 #'
 #'
-#' @param orig_file: a vector of file addresses
+#' @param orig_file a vector of file addresses
 #' (usually `orig` variable from `pip_inventory`)
 #'
 #' @return list
