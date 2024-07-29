@@ -84,10 +84,15 @@ fk_micro_gen <- function(pip_inventory) {
   # Wealth and Weight   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+  # Note: The sampling does not account for size of the household
+  # (larger households tend to have higher consumption/income) and
+  # it does not differentiate between consumption and income
+
   lw_vec_all <- c(0)
 
   for(j in 2:length(svy_tst)){
     w_vec <- svy_tst[[j]]$welfare[!is.na(svy_tst[[j]]$welfare)]
+    w_vec <- unique(w_vec)
     lw_vec <- log(w_vec + 1 + abs(min(w_vec)))
     lw_vec_sc <- scale(lw_vec)
     lw_vec_smp <- sample(lw_vec_sc, 100, replace = TRUE)
