@@ -2,10 +2,7 @@
 #'
 #' @param pip_inventory
 #'
-#' @return
-#' @export
-#'
-#' @examples
+#' @return data.table
 fk_micro_gen <- function(pip_inventory) {
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
