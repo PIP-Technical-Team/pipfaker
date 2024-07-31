@@ -61,7 +61,7 @@ fk_micro_gen <- function(pip_inventory,
 
   fake_svy <- data.table::setDT(fake_svy)
 
-  fake_svy$pid <- rowidv(fake_svy, cols = "hhid")
+  fake_svy$pid <- data.table::rowidv(fake_svy, cols = "hhid")
 
   n_hh <- collapse::fndistinct(fake_svy$hhid)
 
@@ -71,16 +71,17 @@ fk_micro_gen <- function(pip_inventory,
 
 
   if(!("gender" %in% names(fake_svy))){
-    fake_svy <- fake_svy[, gender := sample(c("male","female"),
+
+    fake_svy$gender <- sample(c("male","female"),
                              nrow(fake_svy),
                              prob=c(0.5,0.5),
-                             replace =TRUE)]
+                             replace =TRUE)
   }
 
   if(!("area" %in% names(fake_svy))){
 
-    fake_svy <- fake_svy[, area := sample(c("urban","rural"), 1,
-                              prob = c(0.3,0.7)), by = hhid]
+    fake_svy <- fake_svy[, c("area") := sample(c("urban","rural"), 1,
+                              prob = c(0.3,0.7)), by = c("hhid")]
 
   }
 
