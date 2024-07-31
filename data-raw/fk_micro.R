@@ -1,6 +1,6 @@
 #Libraries
 
-library(dplyr)
+library(collapse)
 library(data.table)
 
 # Load pip_inventory (needs access to Y Drive)
