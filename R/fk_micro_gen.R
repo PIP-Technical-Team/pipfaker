@@ -4,18 +4,29 @@
 #' @param svy_sample number of surveys to sample from `pip_inventory`
 #' @param n_obs number of observation of data.table. Default is average of
 #' observations of `svy_sample`
+#' @param seed_svy Seed for sampling of surveys from `pip_inventory`
 #'
 #' @return data.table
 fk_micro_gen <- function(pip_inventory,
                          svy_sample = 20,
-                         n_obs = NULL) {
+                         n_obs = NULL,
+                         seed_svy = NULL) {
+
+  ### set seed ---------
+
+  if(is.null(seed_svy)){
+    seed_svy <- 51089
+  }
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Select sample of surveys   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   gpwg <- pip_inventory[pip_inventory$source=="GPWG",]
 
-  gpwg_tst <- gpwg[sample(1:nrow(gpwg), svy_sample, replace=FALSE),]
+  gpwg_tst <- gpwg[withr::with_seed(seed_svy,
+                                    sample(1:nrow(gpwg),
+                                           svy_sample,
+                                           replace=FALSE)),]
 
   svy_tst <- load_files_pip(gpwg_tst$orig)
 
