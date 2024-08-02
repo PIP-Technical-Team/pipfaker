@@ -111,12 +111,14 @@ fk_micro_gen <- function(svy_sample = 20,
                              replace =TRUE)
   }
 
-  if(!("area" %in% names(fake_svy))){
+  #if(!("area" %in% names(fake_svy))){
 
-    fake_svy <- fake_svy[, c("area") := sample(c("urban","rural"), 1,
+  #Note: generate area according to new hhid
+
+  fake_svy <- fake_svy[, c("area") := sample(c("urban","rural"), 1,
                               prob = c(0.3,0.7)), by = c("hhid")]
 
-  }
+  #}
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Wealth and Weight   ---------
