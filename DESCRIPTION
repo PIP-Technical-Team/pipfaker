@@ -18,4 +18,5 @@ Imports:
     haven,
     joyn,
     stats,
+    stringr,
     withr
