@@ -17,6 +17,8 @@ Imports:
     dplyr,
     haven,
     joyn,
+    pipload,
+    rlang,
     stats,
     stringr,
     withr

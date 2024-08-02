@@ -5,6 +5,8 @@
 #' observations of `svy_sample`
 #' @param seed_svy Seed for sampling of surveys from `pip_inventory`
 #'
+#' @import collapse
+#'
 #' @return data.table
 fk_micro_gen <- function(svy_sample = 20,
                          n_obs = NULL,

@@ -24,4 +24,5 @@ load_files_pip <- function(orig_file) {
 
 ignore_unused_imports <- function() {
   dplyr::across
+  rlang::.data
 }
