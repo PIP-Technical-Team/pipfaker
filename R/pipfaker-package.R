@@ -13,3 +13,17 @@
 #' @importFrom data.table data.table
 ## usethis namespace: end
 NULL
+
+# Make sure data.table knows we know we're using it
+#' @noRd
+.datatable.aware = TRUE
+
+## quiets concerns of R CMD check re: the .'s that appear in pipelines
+if(getRversion() >= "2.15.1")
+  utils::globalVariables(c(".",
+                           'distribution_type',
+                           'cpi',
+                           'ppp',
+                           'welfare',
+                           'welfare_lcu',
+                           'welfare_ppp'))

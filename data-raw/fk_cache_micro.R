@@ -4,16 +4,17 @@
 
 library(collapse)
 library(data.table)
+library(wbpip)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Generate micro data   ---------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-fk_micro <- fk_micro_gen()
+fk_cache_micro <- fk_cache_micro_gen()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Save data   ---------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #save(fk_micro, file = "data/fk_micro.csv")
-usethis::use_data(fk_micro, overwrite = TRUE)
+usethis::use_data(fk_cache_micro, overwrite = TRUE)
