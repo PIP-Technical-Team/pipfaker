@@ -1,14 +1,14 @@
-#' Fake data generator for raw micro
+#' Fake data generator for cache micro
 #'
-#' @param svy_sample number of surveys to sample from `pip_inventory`
+#' @param svy_sample number of surveys to sample from `cache_inventory`
 #' @param n_obs number of observation of data.table. Default is average of
 #' observations of `svy_sample`
-#' @param seed_svy Seed for sampling of surveys from `pip_inventory`
+#' @param seed_svy Seed for sampling of surveys from `cache_inventory`
 #'
 #' @import collapse
 #'
 #' @return data.table
-fk_micro_gen <- function(svy_sample = 20,
+fk_cache_micro_gen <- function(svy_sample = 20,
                          n_obs = NULL,
                          seed_svy = NULL) {
 
@@ -19,12 +19,6 @@ fk_micro_gen <- function(svy_sample = 20,
   }
 
   ### Load inventory (needs access to Y Drive) ------------
-
-  # pip_inventory <-
-  #   pipload::pip_find_data(
-  #     inv_file = "//w1wbgencifs01/pip/PIP-Data_QA/_inventory/inventory.fst",
-  #     filter_to_pc = TRUE,
-  #     maindir = "//w1wbgencifs01/pip/PIP-Data_QA/")
 
   cache_inventory <- pipload::pip_load_cache_inventory(version = "20240326_2017_01_02_PROD")
   cache_inventory$source <- stringr::str_split(cache_inventory$cache_id, "_", simplify = TRUE)[,6]
@@ -45,16 +39,14 @@ fk_micro_gen <- function(svy_sample = 20,
   # Select sample of surveys   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  #ls_svy <- cache_inventory[cache_inventory$source=="GPWG",]
-
   ls_smp <- ls_svy[withr::with_seed(seed_svy,
                                     sample(1:nrow(ls_svy),
                                            svy_sample,
                                            replace=FALSE)),]
 
-  svy_tst <- load_files_pip(ls_smp$orig)
+  svy_tst <- load_files_cache(ls_smp$cache_file)
 
-  names(svy_tst) <- basename(ls_smp$survey_id)
+  names(svy_tst) <- basename(ls_smp$cache_id)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Variables with unique values   ---------
@@ -155,6 +147,20 @@ fk_micro_gen <- function(svy_sample = 20,
                     reportvar = FALSE,
                     verbose = FALSE)
   fake_svy$weight <- 1/n_obs
+
+  # As performed in pip_ingestion_pipeline::process_svy_data_to_cache:
+
+  fake_svy <- fake_svy[
+    ,
+    welfare_lcu := welfare
+  ][
+    ,
+    welfare_ppp := wbpip::deflate_welfare_mean(
+      welfare_mean = welfare_lcu,
+      ppp          = ppp,
+      cpi          = cpi
+    )
+  ]
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Return   ---------
