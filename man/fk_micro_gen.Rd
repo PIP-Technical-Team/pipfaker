@@ -2,7 +2,7 @@
 % Please edit documentation in R/fk_micro_gen.R
 \name{fk_micro_gen}
 \alias{fk_micro_gen}
-\title{Fake data generator}
+\title{Fake data generator for raw micro}
 \usage{
 fk_micro_gen(svy_sample = 20, n_obs = NULL, seed_svy = NULL)
 }
@@ -18,5 +18,5 @@ observations of `svy_sample`}
 data.table
 }
 \description{
-Fake data generator
+Fake data generator for raw micro
 }
