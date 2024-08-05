@@ -26,4 +26,5 @@ if(getRversion() >= "2.15.1")
                            'ppp',
                            'welfare',
                            'welfare_lcu',
-                           'welfare_ppp'))
+                           'welfare_ppp',
+                           'cache_id'))
