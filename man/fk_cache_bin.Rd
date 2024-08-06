@@ -33,7 +33,7 @@ A data frame with 33 variables:
   \item{collection}{??}
   \item{module}{??}
   \item{tool}{??}
-  \item{source}{Source of the data: `G`}
+  \item{source}{Source of the data: `BIN`}
   \item{reporting_level}{Reporting level of the survey}
   \item{ppp}{Purchase Power Parity}
   \item{cpi}{Consumper Price Index}
