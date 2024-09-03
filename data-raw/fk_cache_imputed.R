@@ -10,7 +10,7 @@ library(wbpip)
 # Generate micro data   ---------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-fk_cache_imputed <- fk_cache_imputed_gen(n_obs = 1500)
+fk_cache_imputed <- fk_cache_imputed_gen(n_obs = 1500, n_sim = 10)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Save data   ---------
