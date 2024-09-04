@@ -1,0 +1,35 @@
+---
+title: "pipfaker: An R package to access and generate fake PIP data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{pipfaker}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Background
+
+This package is develop for users who would like to use (or generate) fake PIP data in several formats (raw or cache) and for different distribution types (micro, group, bin or imputed).
+
+## Raw data
+
+The fake data set called `fk_micro` was generated using 20 random surveys from `pip_inventory` (see `fk_micro_gen()`). This is an example of how it can be used:
+
+```{r setup}
+library(pipfaker)
+
+micro_raw_pip <- fk_micro
+
+mean_welf <- mean(micro_raw_pip$welfare, w = micro_raw_pip$weight)
+mean_welf
+```
+
+
+
