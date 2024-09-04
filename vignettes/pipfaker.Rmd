@@ -18,18 +18,28 @@ knitr::opts_chunk$set(
 
 This package is develop for users who would like to use (or generate) fake PIP data in several formats (raw or cache) and for different distribution types (micro, group, bin or imputed).
 
+```{r setup}
+library(pipfaker)
+```
+
 ## Raw data
 
 The fake data set called `fk_micro` was generated using 20 random surveys from `pip_inventory` (see `fk_micro_gen()`). This is an example of how it can be used:
 
-```{r setup}
-library(pipfaker)
-
+```{r raw}
 micro_raw_pip <- fk_micro
 
 mean_welf <- mean(micro_raw_pip$welfare, w = micro_raw_pip$weight)
 mean_welf
 ```
 
+## Cache data
 
+The fake data set called `fk_micro` was generated using 20 random surveys from `pip_inventory` (see `fk_micro_gen()`). This is an example of how it can be used:
 
+```{r cache}
+micro_cache_pip <- fk_cache_micro
+
+mean_welf <- mean(micro_cache_pip$welfare_ppp, w = micro_cache_pip$weight)
+mean_welf
+```
