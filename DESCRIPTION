@@ -24,3 +24,7 @@ Imports:
     stringr,
     wbpip,
     withr
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
