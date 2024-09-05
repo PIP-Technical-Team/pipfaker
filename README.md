@@ -1,0 +1,37 @@
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+# pipfaker
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of this package is to provide users who would like to use (or
+generate) *fake* [PIP](https://pip.worldbank.org/) data in several
+formats (raw or cache) and distribution types (micro, group, bin or
+imputed).
+
+## Installation
+
+You can install the development version of pipfaker from
+[GitHub](https://github.com/) with:
+
+``` r
+# install.packages("pak")
+pak::pak("PIP-Technical-Team/pipfaker")
+```
+
+## Example
+
+This is a basic example which shows you how to use a fake PIP data set:
+
+``` r
+library(pipfaker)
+## basic example code
+
+micro_cache_pip <- fk_cache_micro
+
+mean_welf <- mean(micro_cache_pip$welfare_ppp, w = micro_cache_pip$weight)
+mean_welf
+#> [1] 167.9859
+```
