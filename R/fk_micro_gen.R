@@ -23,24 +23,10 @@ fk_micro_gen <- function(pip_files,
                                            svy_sample,
                                            replace=FALSE)),]
 
-  svy_tst <- load_files_pip(ls_smp$orig)
+  svy_tst <- lapply(ls_smp$orig,load_files_pip)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Variables with unique values   ---------
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-  var_uniq <- c(0)
-
-  for(j in 1:length(svy_tst[[1]])){
-    uniq <- collapse::fndistinct(svy_tst[[1]][j], na.rm = FALSE)
-    if(uniq==1){
-      var_uniq <- cbind(var_uniq, collapse::funique(svy_tst[[1]][j]))
-    }
-  }
-  var_uniq <- var_uniq[-1]
-
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Create new dataset   ---------
+  # Create new data set   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   if (is.null(n_obs)){
@@ -48,6 +34,11 @@ fk_micro_gen <- function(pip_files,
     av_n_obs <- round(collapse::fmean(collapse::unlist2d(n_obs)$V1))
     n_obs <- av_n_obs
   }
+
+  var_dist <- collapse::fndistinct(svy_tst[[1]], na.rm = FALSE)
+  uniq     <- var_dist[var_dist==1]
+  var_uniq <- collapse::funique(svy_tst[[1]]|>
+                                  collapse::fselect(names(uniq)))
 
   fake_svy <- var_uniq[rep(1,each=n_obs),]
 
