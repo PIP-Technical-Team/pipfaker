@@ -1,10 +1,10 @@
 #' Fake data generator for raw micro
 #'
-#' @param pip_files list with origin file location from `pip_cache_inventory`
-#' @param svy_sample number of surveys to sample from `pip_cache_inventory`
+#' @param pip_files data.table with origin file location from `pip_cache_inventory`.
+#' @param svy_sample number of surveys to sample from `pip_cache_inventory`. Default is 20.
 #' @param n_obs number of observation of data.table. Default is average of
-#' observations of `svy_sample`
-#' @param seed_svy Seed for sampling of surveys from `pip_cache_inventory`
+#' observations of `svy_sample`.
+#' @param seed_svy Seed for sampling of surveys from `pip_cache_inventory`. Default is 51089
 #'
 #' @import collapse
 #'
@@ -13,6 +13,15 @@ fk_micro_gen <- function(pip_files,
                          svy_sample = 20,
                          n_obs = NULL,
                          seed_svy = 51089) {
+
+  ## WARNING IF FILES ARE LESS THAN 20.
+  if (nrow(pip_files)<20){
+
+    cli::cli_abort(c("The number of files from `pip_files` needs to be",
+                     "larger than `svy_sample` (Default 20)"))
+
+    }
+
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Select random sample of surveys and load data ------

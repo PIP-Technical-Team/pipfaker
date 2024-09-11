@@ -8,6 +8,16 @@
 #'
 load_files_pip <- function(orig_file) {
 
+  # Warning:
+
+  if(!file.exists(orig_file)){
+
+    cli::cli_abort(c("Make sure you have access to PIP \\Y: Drive.",
+                     "If you do not have have access you won't be able to",
+                     "load cache PIP files and generate your own fake files.",
+                     "You can use the fake data already provided by this package."))
+  }
+
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # computations   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
