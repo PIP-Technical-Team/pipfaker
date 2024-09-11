@@ -37,7 +37,7 @@ fk_cache_bin_gen <- function(svy_sample = 20,
                                            svy_sample,
                                            replace=FALSE)),]
 
-  svy_tst <- load_files_cache(ls_smp$cache_file)
+  svy_tst <- lapply(ls_smp$cache_file,load_files_pip)
 
   names(svy_tst) <- basename(ls_smp$cache_id)
 

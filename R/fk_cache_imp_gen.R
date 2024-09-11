@@ -42,7 +42,7 @@ fk_cache_imputed_gen <- function(n_obs = NULL,
                                            1,
                                            replace=FALSE)),]
 
-  svy_tst <- load_files_cache(ls_smp$cache_file)
+  svy_tst <- lapply(ls_smp$cache_file,load_files_pip)
 
   names(svy_tst) <- basename(ls_smp$cache_id)
 

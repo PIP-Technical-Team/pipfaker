@@ -16,7 +16,10 @@ fk_cache_group_gen <- function(n_quantiles = 20) {
   # Load IND 1983   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  svy_ind <- load_files_cache(cache_inventory[cache_id=="IND_1983_NSS_D2_CON_GROUP","cache_file"])[[1]]
+  orig_file <- cache_inventory[cache_id=="IND_1983_NSS_D2_CON_GROUP","cache_file"]|>
+    as.character()
+
+  svy_ind <- load_files_pip(orig_file)
 
   svy_ind_rural <- svy_ind[svy_ind$reporting_level=="rural",]
 
