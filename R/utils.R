@@ -10,7 +10,7 @@ load_files_pip <- function(orig_file) {
 
   # Warning:
 
-  if(!file.exists(orig_file)){
+  if(file.exists(orig_file) == FALSE){
 
     cli::cli_abort(c("Make sure you have access to PIP \\Y: Drive.",
                      "If you do not have have access you won't be able to",
@@ -26,7 +26,7 @@ load_files_pip <- function(orig_file) {
     fs::path_ext()
 
   if (ext == "qs") {
-    dt <- qs::read(orig_file) |>
+    dt <- qs::qread(orig_file) |>
       collapse::qDT()
   }
   if (ext == "fst") {
@@ -43,28 +43,6 @@ load_files_pip <- function(orig_file) {
   return(dt)
 
 }
-
-#' #' Load and merge data files from cache
-#' #'
-#' #'
-#' #' @param cache_file a vector of file addresses
-#' #' (usually `cache_file` variable from `cache_inventory`)
-#' #'
-#' #' @return list
-#' #'
-#' load_files_cache <- function(cache_file) {
-#'
-#'   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#'   # computations   ---------
-#'   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#'   dt <- lapply(cache_file, fst::read_fst)
-#'
-#'   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#'   # Return   ---------
-#'   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#'   return(dt)
-#'
-#' }
 
 
 ignore_unused_imports <- function() {

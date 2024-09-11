@@ -4,15 +4,17 @@
 \alias{fk_micro_gen}
 \title{Fake data generator for raw micro}
 \usage{
-fk_micro_gen(svy_sample = 20, n_obs = NULL, seed_svy = NULL)
+fk_micro_gen(pip_files, svy_sample = 20, n_obs = NULL, seed_svy = 51089)
 }
 \arguments{
-\item{svy_sample}{number of surveys to sample from `pip_inventory`}
+\item{pip_files}{data.table with origin file location from `pip_cache_inventory`.}
+
+\item{svy_sample}{number of surveys to sample from `pip_cache_inventory`. Default is 20.}
 
 \item{n_obs}{number of observation of data.table. Default is average of
-observations of `svy_sample`}
+observations of `svy_sample`.}
 
-\item{seed_svy}{Seed for sampling of surveys from `pip_inventory`}
+\item{seed_svy}{Seed for sampling of surveys from `pip_cache_inventory`. Default is 51089}
 }
 \value{
 data.table
