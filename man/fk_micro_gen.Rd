@@ -7,7 +7,7 @@
 fk_micro_gen(pip_files, svy_sample = 20, n_obs = NULL, seed_svy = 51089)
 }
 \arguments{
-\item{pip_files}{data.table with origin file location from `pip_cache_inventory`.}
+\item{pip_files}{character vector with all `orig` files location from `pip_cache_inventory`.}
 
 \item{svy_sample}{number of surveys to sample from `pip_cache_inventory`. Default is 20.}
 

@@ -4,14 +4,16 @@
 \alias{fk_cache_bin_gen}
 \title{Fake data generator for cache bin data}
 \usage{
-fk_cache_bin_gen(svy_sample = 20, n_bins = 400, seed_svy = 51089)
+fk_cache_bin_gen(pip_files, svy_sample = 20, n_bins = 400, seed_svy = 51089)
 }
 \arguments{
+\item{pip_files}{character vector with all `cache_file` location from `pip_cache_inventory`.}
+
 \item{svy_sample}{number of surveys to sample from `cache_inventory`. Default is 20.}
 
 \item{n_bins}{number of bins of data.table. Default is 400.}
 
-\item{seed_svy}{Seed for sampling of surveys from `cache_inventory`}
+\item{seed_svy}{Seed for sampling of surveys from `cache_inventory`. Default is 51089.}
 }
 \value{
 data.table
