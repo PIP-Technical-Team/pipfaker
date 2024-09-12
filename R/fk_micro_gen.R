@@ -1,6 +1,6 @@
 #' Fake data generator for raw micro
 #'
-#' @param pip_files data.table with origin file location from `pip_cache_inventory`.
+#' @param pip_files character vector with all `orig` files location from `pip_cache_inventory`.
 #' @param svy_sample number of surveys to sample from `pip_cache_inventory`. Default is 20.
 #' @param n_obs number of observation of data.table. Default is average of
 #' observations of `svy_sample`.
@@ -15,7 +15,7 @@ fk_micro_gen <- function(pip_files,
                          seed_svy = 51089) {
 
   ## WARNING IF FILES ARE LESS THAN 20.
-  if (nrow(pip_files)<20){
+  if (length(pip_files) < svy_sample){
 
     cli::cli_abort(c("The number of files from `pip_files` needs to be",
                      "larger than `svy_sample` (Default 20)"))
@@ -28,11 +28,11 @@ fk_micro_gen <- function(pip_files,
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   ls_smp <- pip_files[withr::with_seed(seed_svy,
-                                    sample(1:nrow(pip_files),
+                                    sample(1:length(pip_files),
                                            svy_sample,
-                                           replace=FALSE)),]
+                                           replace=FALSE))]
 
-  svy_tst <- lapply(ls_smp$orig,load_files_pip)
+  svy_tst <- lapply(ls_smp,load_files_pip)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Create new data set   ---------

@@ -28,7 +28,7 @@ pip_micro_files <- cache_inventory |>
 # Generate micro data   ---------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-fk_micro <- fk_micro_gen(pip_micro_files)
+fk_micro <- fk_micro_gen(pip_micro_files$orig)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Save data   ---------
