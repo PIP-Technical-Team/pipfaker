@@ -42,8 +42,6 @@ fk_cache_group_gen <- function(n_quantiles = 20) {
 
   # Note: We create a synthetic from the Datt data and create quantiles
 
-  datt <- datt
-
   welfare <- wbpip:::sd_create_synth_vector(datt$lwelfare,datt$weight,mean = 109.90)$welfare
 
   fake_svy$welfare <- wbpip::md_compute_quantiles(welfare, n_quantile = n_quantiles)
