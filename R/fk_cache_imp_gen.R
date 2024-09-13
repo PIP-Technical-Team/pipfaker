@@ -1,82 +1,37 @@
 #' Fake data generator for cache imputed
 #'
+#' @param pip_files character vector with all `cache_file` location from `pip_cache_inventory`.
+#' Needs to be larger than 5 characters.
 #' @param n_obs number of observation per imputation.
-#' @param n_sim number of imputations. Default is 50
-#' @param d_type Either `D1` or `D2`
+#' @param n_sim number of imputations. Default is 50.
 #' @param seed_svy Seed for sampling of surveys from `cache_inventory`
 #'
 #' @import collapse
 #'
 #' @return data.table
-fk_cache_imputed_gen <- function(n_obs = NULL,
+fk_cache_imputed_gen <- function(pip_files,
+                                 n_obs = NULL,
                                  n_sim = 50,
-                                 d_type = "D2",
                                  seed_svy = 51089) {
 
+  ## WARNING IF FILES ARE LESS THAN 5.
+  if (length(pip_files) < 5){
 
+    cli::cli_abort(c("The number of files from `pip_files` needs to be",
+                     "larger than 5"))
 
-  ### Load inventory (needs access to Y Drive) ------------
-
-  cache_inventory <- pipload::pip_load_cache_inventory(version = "20240326_2017_01_02_PROD")
-  cache_inventory$source <- stringr::str_split(cache_inventory$cache_id, "_", simplify = TRUE)[,6]
-  cache_inventory$DV <- stringr::str_split(cache_inventory$cache_id, "_", simplify = TRUE)[,4]
-
-  ### Choose only micro data
-
-  #Note: dta is an internal file with a list of distribution_type
-
-  ls_svy <- cache_inventory|>
-    joyn::joyn(dta, by = "cache_id", match_type = "1:m",
-                    y_vars_to_keep = "distribution_type",
-                    keep = "left",
-                    reportvar = FALSE,
-                    verbose = FALSE)|>
-    collapse::fsubset(distribution_type == "imputed" & DV == d_type)
+  }
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Select sample of surveys   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  ls_smp <- ls_svy[withr::with_seed(seed_svy,
-                                    sample(1:nrow(ls_svy),
+  ls_smp <- pip_files[withr::with_seed(seed_svy,
+                                    sample(1:length(pip_files),
                                            1,
-                                           replace=FALSE)),]
+                                           replace=FALSE))]
 
-  svy_tst <- load_files_cache(ls_smp$cache_file)
-
-  names(svy_tst) <- basename(ls_smp$cache_id)
-
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Variables with unique values   ---------
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-  svy_tst <- svy_tst[[1]]
-
-  svy_tst_rural <- svy_tst[svy_tst$reporting_level=="rural",]
-
-  var_uniq_rural <- c(0)
-
-  for(j in 1:length(svy_tst_rural)){
-    uniq <- collapse::fndistinct(svy_tst_rural[j], na.rm = FALSE)
-    if(uniq==1){
-      var_uniq_rural <- cbind(var_uniq_rural, collapse::funique(svy_tst_rural[j]))
-    }
-  }
-
-  var_uniq_rural <- var_uniq_rural[-1]
-
-  svy_tst_urban <- svy_tst[svy_tst$reporting_level=="urban",]
-
-  var_uniq_urban <- c(0)
-
-  for(j in 1:length(svy_tst_urban)){
-    uniq <- collapse::fndistinct(svy_tst_urban[j], na.rm = FALSE)
-    if(uniq==1){
-      var_uniq_urban <- cbind(var_uniq_urban, collapse::funique(svy_tst_urban[j]))
-    }
-  }
-
-  var_uniq_urban <- var_uniq_urban[-1]
+  svy_tst <- lapply(ls_smp,load_files_pip)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Create new dataset   ---------
@@ -89,6 +44,23 @@ fk_cache_imputed_gen <- function(n_obs = NULL,
     n_obs_rural <- round(n_obs*(1/3))
     n_obs_urban <- n_obs - n_obs_rural
   }
+
+  svy_tst <- svy_tst[[1]]
+
+  svy_tst_rural <- svy_tst[svy_tst$reporting_level=="rural",]
+
+  var_dist <- collapse::fndistinct(svy_tst_rural, na.rm = FALSE)
+  uniq     <- var_dist[var_dist==1]
+  var_uniq_rural <- collapse::funique(svy_tst_rural|>
+                                        collapse::fselect(names(uniq)))
+
+
+  svy_tst_urban <- svy_tst[svy_tst$reporting_level=="urban",]
+
+  var_dist <- collapse::fndistinct(svy_tst_urban, na.rm = FALSE)
+  uniq     <- var_dist[var_dist==1]
+  var_uniq_urban <- collapse::funique(svy_tst_urban|>
+                                        collapse::fselect(names(uniq)))
 
   fake_svy <- collapse::rowbind(var_uniq_rural[rep(1,each=n_obs_rural),],
                                 var_uniq_urban[rep(1,each=n_obs_urban),])
@@ -118,7 +90,6 @@ fk_cache_imputed_gen <- function(n_obs = NULL,
 
   lw_vec_all <- lw_vec_all[-1]
   w_vec_rural <- exp(lw_vec_all)
-
   w_vec_rural <- w_vec_rural + 1 + abs(min(svy_tst_rural$welfare))
 
   ### Urban

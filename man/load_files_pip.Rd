@@ -2,17 +2,17 @@
 % Please edit documentation in R/utils.R
 \name{load_files_pip}
 \alias{load_files_pip}
-\title{Load and merge data files from PIP drive}
+\title{Load data from files in PIP drive}
 \usage{
 load_files_pip(orig_file)
 }
 \arguments{
-\item{orig_file}{a vector of file addresses
-(usually `orig` variable from `cache_inventory`)}
+\item{orig_file}{a file address
+(usually `orig` or `cache_file` variable from `cache_inventory`)}
 }
 \value{
 list
 }
 \description{
-Load and merge data files from PIP drive
+Load data from files in PIP drive
 }

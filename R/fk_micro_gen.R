@@ -1,77 +1,41 @@
 #' Fake data generator for raw micro
 #'
-#' @param svy_sample number of surveys to sample from `pip_inventory`
+#' @param pip_files character vector with all `orig` files location from `pip_cache_inventory`.
+#' @param svy_sample number of surveys to sample from `pip_cache_inventory`. Default is 20.
 #' @param n_obs number of observation of data.table. Default is average of
-#' observations of `svy_sample`
-#' @param seed_svy Seed for sampling of surveys from `pip_inventory`
+#' observations of `svy_sample`.
+#' @param seed_svy Seed for sampling of surveys from `pip_cache_inventory`. Default is 51089
 #'
 #' @import collapse
 #'
 #' @return data.table
-fk_micro_gen <- function(svy_sample = 20,
+fk_micro_gen <- function(pip_files,
+                         svy_sample = 20,
                          n_obs = NULL,
-                         seed_svy = NULL) {
+                         seed_svy = 51089) {
 
-  ### set seed ---------
+  ## WARNING IF FILES ARE LESS THAN 20.
+  if (length(pip_files) < svy_sample){
 
-  if(is.null(seed_svy)){
-    seed_svy <- 51089
-  }
+    cli::cli_abort(c("The number of files from `pip_files` needs to be",
+                     "larger than `svy_sample` (Default 20)"))
 
-  ### Load inventory (needs access to Y Drive) ------------
-
-  # pip_inventory <-
-  #   pipload::pip_find_data(
-  #     inv_file = "//w1wbgencifs01/pip/PIP-Data_QA/_inventory/inventory.fst",
-  #     filter_to_pc = TRUE,
-  #     maindir = "//w1wbgencifs01/pip/PIP-Data_QA/")
-
-  cache_inventory <- pipload::pip_load_cache_inventory(version = "20240326_2017_01_02_PROD")
-  cache_inventory$source <- stringr::str_split(cache_inventory$cache_id, "_", simplify = TRUE)[,6]
-
-  ### Choose only micro data
-
-  #Note: dta is an internal file with a list of distribution_type
-
-  ls_svy <- cache_inventory|>
-    joyn::joyn(dta, by = "cache_id", match_type = "1:m",
-                    y_vars_to_keep = "distribution_type",
-                    keep = "left",
-                    reportvar = FALSE,
-                    verbose = FALSE)|>
-    collapse::fsubset(distribution_type == "micro")
-
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Select sample of surveys   ---------
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-  #ls_svy <- cache_inventory[cache_inventory$source=="GPWG",]
-
-  ls_smp <- ls_svy[withr::with_seed(seed_svy,
-                                    sample(1:nrow(ls_svy),
-                                           svy_sample,
-                                           replace=FALSE)),]
-
-  svy_tst <- load_files_pip(ls_smp$orig)
-
-  names(svy_tst) <- basename(ls_smp$survey_id)
-
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Variables with unique values   ---------
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-  var_uniq <- c(0)
-
-  for(j in 1:length(svy_tst[[1]])){
-    uniq <- collapse::fndistinct(svy_tst[[1]][j], na.rm = FALSE)
-    if(uniq==1){
-      var_uniq <- cbind(var_uniq, collapse::funique(svy_tst[[1]][j]))
     }
-  }
-  var_uniq <- var_uniq[-1]
+
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Create new dataset   ---------
+  # Select random sample of surveys and load data ------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  ls_smp <- pip_files[withr::with_seed(seed_svy,
+                                    sample(1:length(pip_files),
+                                           svy_sample,
+                                           replace=FALSE))]
+
+  svy_tst <- lapply(ls_smp,load_files_pip)
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Create new data set   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   if (is.null(n_obs)){
@@ -79,6 +43,11 @@ fk_micro_gen <- function(svy_sample = 20,
     av_n_obs <- round(collapse::fmean(collapse::unlist2d(n_obs)$V1))
     n_obs <- av_n_obs
   }
+
+  var_dist <- collapse::fndistinct(svy_tst[[1]], na.rm = FALSE)
+  uniq     <- var_dist[var_dist==1]
+  var_uniq <- collapse::funique(svy_tst[[1]]|>
+                                  collapse::fselect(names(uniq)))
 
   fake_svy <- var_uniq[rep(1,each=n_obs),]
 

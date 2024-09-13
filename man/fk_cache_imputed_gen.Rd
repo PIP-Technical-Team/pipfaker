@@ -4,14 +4,15 @@
 \alias{fk_cache_imputed_gen}
 \title{Fake data generator for cache imputed}
 \usage{
-fk_cache_imputed_gen(n_obs = NULL, n_sim = 50, d_type = "D2", seed_svy = 51089)
+fk_cache_imputed_gen(pip_files, n_obs = NULL, n_sim = 50, seed_svy = 51089)
 }
 \arguments{
+\item{pip_files}{character vector with all `cache_file` location from `pip_cache_inventory`.
+Needs to be larger than 5 characters.}
+
 \item{n_obs}{number of observation per imputation.}
 
-\item{n_sim}{number of imputations. Default is 50}
-
-\item{d_type}{Either `D1` or `D2`}
+\item{n_sim}{number of imputations. Default is 50.}
 
 \item{seed_svy}{Seed for sampling of surveys from `cache_inventory`}
 }

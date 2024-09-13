@@ -8,15 +8,16 @@
 #' @return data.table
 fk_cache_group_gen <- function(n_quantiles = 20) {
 
-  ### Load inventory (needs access to Y Drive) ------------
-
-  cache_inventory <- pipload::pip_load_cache_inventory(version = "20240326_2017_01_02_PROD")
-
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Load IND 1983   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  svy_ind <- load_files_cache(cache_inventory[cache_id=="IND_1983_NSS_D2_CON_GROUP","cache_file"])[[1]]
+  cache_inventory <- pipload::pip_load_cache_inventory(version = "20240326_2017_01_02_PROD")
+
+  orig_file <- cache_inventory[cache_id=="IND_1983_NSS_D2_CON_GROUP","cache_file"]|>
+    as.character()
+
+  svy_ind <- load_files_pip(orig_file)
 
   svy_ind_rural <- svy_ind[svy_ind$reporting_level=="rural",]
 
@@ -24,16 +25,10 @@ fk_cache_group_gen <- function(n_quantiles = 20) {
   # Variables with unique values   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  var_uniq <- c(0)
-
-  for(j in 1:length(svy_ind_rural)){
-    uniq <- collapse::fndistinct(svy_ind_rural[j], na.rm = FALSE)
-    if(uniq==1){
-      var_uniq <- cbind(var_uniq, collapse::funique(svy_ind_rural[j]))
-    }
-  }
-
-  var_uniq <- var_uniq[-1]
+  var_dist <- collapse::fndistinct(svy_ind_rural, na.rm = FALSE)
+  uniq     <- var_dist[var_dist==1]
+  var_uniq <- collapse::funique(svy_ind_rural|>
+                                  collapse::fselect(names(uniq)))
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Create new dataset   ---------
@@ -46,8 +41,6 @@ fk_cache_group_gen <- function(n_quantiles = 20) {
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   # Note: We create a synthetic from the Datt data and create quantiles
-
-  datt <- datt
 
   welfare <- wbpip:::sd_create_synth_vector(datt$lwelfare,datt$weight,mean = 109.90)$welfare
 
