@@ -26,12 +26,9 @@ fk_cache_imputed_gen <- function(pip_files,
   # Select sample of surveys   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  ls_smp <- pip_files[withr::with_seed(seed_svy,
-                                    sample(1:length(pip_files),
-                                           1,
-                                           replace=FALSE))]
-
-  svy_tst <- lapply(ls_smp,load_files_pip)
+  svy_tst <- load_svys(pip_files,
+                       seed_svy,
+                       1)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Create new dataset   ---------
@@ -46,24 +43,14 @@ fk_cache_imputed_gen <- function(pip_files,
   }
 
   svy_tst <- svy_tst[[1]]
-
   svy_tst_rural <- svy_tst[svy_tst$reporting_level=="rural",]
-
-  var_dist <- collapse::fndistinct(svy_tst_rural, na.rm = FALSE)
-  uniq     <- var_dist[var_dist==1]
-  var_uniq_rural <- collapse::funique(svy_tst_rural|>
-                                        collapse::fselect(names(uniq)))
-
-
   svy_tst_urban <- svy_tst[svy_tst$reporting_level=="urban",]
 
-  var_dist <- collapse::fndistinct(svy_tst_urban, na.rm = FALSE)
-  uniq     <- var_dist[var_dist==1]
-  var_uniq_urban <- collapse::funique(svy_tst_urban|>
-                                        collapse::fselect(names(uniq)))
+  fake_svy_rural <- fk_uniq(svy_tst_rural, n_obs_rural)
+  fake_svy_urban <- fk_uniq(svy_tst_urban, n_obs_urban)
 
-  fake_svy <- collapse::rowbind(var_uniq_rural[rep(1,each=n_obs_rural),],
-                                var_uniq_urban[rep(1,each=n_obs_urban),])
+  fake_svy <- collapse::rowbind(fake_svy_rural,
+                                fake_svy_urban)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Household ID   ---------
@@ -111,8 +98,6 @@ fk_cache_imputed_gen <- function(pip_files,
   w_vec_urban <- w_vec_urban + 1 + abs(min(svy_tst_urban$welfare))
 
   ### Sample per imputation
-
-  fake_svy <- data.table::as.data.table(fake_svy)
 
   fake_imp <- data.table::copy(fake_svy[,`:=`(welfare = ifelse(reporting_level == "rural",
                                         sample(w_vec_rural,n_obs_rural,replace = TRUE),

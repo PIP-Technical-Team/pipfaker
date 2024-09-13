@@ -27,12 +27,9 @@ fk_micro_gen <- function(pip_files,
   # Select random sample of surveys and load data ------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  ls_smp <- pip_files[withr::with_seed(seed_svy,
-                                    sample(1:length(pip_files),
-                                           svy_sample,
-                                           replace=FALSE))]
-
-  svy_tst <- lapply(ls_smp,load_files_pip)
+  svy_tst <- load_svys(pip_files,
+                       seed_svy,
+                       svy_sample)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Create new data set   ---------
@@ -40,32 +37,24 @@ fk_micro_gen <- function(pip_files,
 
   if (is.null(n_obs)){
     n_obs <- collapse::rapply2d(svy_tst, nrow)
-    av_n_obs <- round(collapse::fmean(collapse::unlist2d(n_obs)$V1))
-    n_obs <- av_n_obs
+    n_obs <- round(collapse::fmean(collapse::unlist2d(n_obs)$V1))
   }
 
-  var_dist <- collapse::fndistinct(svy_tst[[1]], na.rm = FALSE)
-  uniq     <- var_dist[var_dist==1]
-  var_uniq <- collapse::funique(svy_tst[[1]]|>
-                                  collapse::fselect(names(uniq)))
-
-  fake_svy <- var_uniq[rep(1,each=n_obs),]
+  fake_svy <- fk_uniq(svy_tst[[1]], n_obs)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Household and Person ID   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   n_hh <- round(n_obs/2)
-
   n_id_hh <- round(stats::rpois(n_hh, 2))
-
   n_id_hh <- rep(n_id_hh[n_id_hh!=0],4)
 
-  fake_svy$hhid <- rep(1:n_hh,times = n_id_hh[1:n_hh])[1:n_obs]
-
-  fake_svy <- data.table::setDT(fake_svy)
-
-  fake_svy$pid <- data.table::rowidv(fake_svy, cols = "hhid")
+  fake_svy <- fake_svy[
+    , hhid := rep(1:n_hh,times = n_id_hh[1:n_hh])[1:n_obs]
+  ][
+    , pid := data.table::rowidv(fake_svy, cols = "hhid")
+  ]
 
   n_hh <- collapse::fndistinct(fake_svy$hhid)
 
@@ -73,23 +62,15 @@ fk_micro_gen <- function(pip_files,
   # Gender and Area   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
-  if(!("gender" %in% names(fake_svy))){
-
-    fake_svy$gender <- sample(c("male","female"),
-                             nrow(fake_svy),
-                             prob=c(0.5,0.5),
-                             replace =TRUE)
-  }
-
-  #if(!("area" %in% names(fake_svy))){
-
   #Note: generate area according to new hhid
 
-  fake_svy <- fake_svy[, c("area") := sample(c("urban","rural"), 1,
-                              prob = c(0.3,0.7)), by = c("hhid")]
-
-  #}
+  fake_svy <- fake_svy[
+    , c("gender") := sample(c("male","female"),nrow(fake_svy),
+                            prob=c(0.5,0.5), replace =TRUE)
+  ][
+    , c("area") := sample(c("urban","rural"), 1,
+                          prob = c(0.3,0.7)), by = c("hhid")
+  ]
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Wealth and Weight   ---------
@@ -123,7 +104,10 @@ fk_micro_gen <- function(pip_files,
                     match_type = "m:1",
                     reportvar = FALSE,
                     verbose = FALSE)
-  fake_svy$weight <- 1/n_obs
+
+  fake_svy <- fake_svy[
+    , weight := 1/n_obs
+  ]
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Return   ---------
