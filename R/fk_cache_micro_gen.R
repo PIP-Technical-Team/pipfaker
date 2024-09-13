@@ -61,17 +61,6 @@ fk_cache_micro_gen <- function(pip_files,
   # Gender and Area   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
-  # if(!("gender" %in% names(fake_svy))){
-  #
-  #   fake_svy$gender <- sample(c("male","female"),
-  #                            nrow(fake_svy),
-  #                            prob=c(0.5,0.5),
-  #                            replace =TRUE)
-  # }
-
-  #if(!("area" %in% names(fake_svy))){
-
   #Note: generate area according to new hhid
 
   fake_svy <- fake_svy[
@@ -81,8 +70,6 @@ fk_cache_micro_gen <- function(pip_files,
     , c("area") := sample(c("urban","rural"), 1,
                               prob = c(0.3,0.7)), by = c("hhid")
     ]
-
-  #}
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Wealth and Weight   ---------
