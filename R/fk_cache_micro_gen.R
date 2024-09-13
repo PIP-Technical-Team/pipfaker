@@ -26,12 +26,9 @@ fk_cache_micro_gen <- function(pip_files,
   # Select sample of surveys   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  ls_smp <- pip_files[withr::with_seed(seed_svy,
-                                    sample(1:length(pip_files),
-                                           svy_sample,
-                                           replace=FALSE))]
-
-  svy_tst <- lapply(ls_smp, load_files_pip)
+  svy_tst <- load_svys(pip_files,
+                       seed_svy,
+                       svy_sample)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Create new dataset   ---------
@@ -39,16 +36,10 @@ fk_cache_micro_gen <- function(pip_files,
 
   if (is.null(n_obs)){
     n_obs <- collapse::rapply2d(svy_tst, nrow)
-    av_n_obs <- round(collapse::fmean(collapse::unlist2d(n_obs)$V1))
-    n_obs <- av_n_obs
+    n_obs <- round(collapse::fmean(collapse::unlist2d(n_obs)$V1))
   }
 
-  var_dist <- collapse::fndistinct(svy_tst[[1]], na.rm = FALSE)
-  uniq     <- var_dist[var_dist==1]
-  var_uniq <- collapse::funique(svy_tst[[1]]|>
-                                  collapse::fselect(names(uniq)))
-
-  fake_svy <- var_uniq[rep(1,each=n_obs),]
+  fake_svy <- fk_uniq(svy_tst[[1]], n_obs)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Household and Person ID   ---------
