@@ -34,49 +34,6 @@ fk_cache_imputed_gen <- function(pip_files,
   svy_tst <- lapply(ls_smp,load_files_pip)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Variables with unique values   ---------
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-  svy_tst <- svy_tst[[1]]
-
-  svy_tst_rural <- svy_tst[svy_tst$reporting_level=="rural",]
-
-  # var_uniq_rural <- c(0)
-  #
-  # for(j in 1:length(svy_tst_rural)){
-  #   uniq <- collapse::fndistinct(svy_tst_rural[j], na.rm = FALSE)
-  #   if(uniq==1){
-  #     var_uniq_rural <- cbind(var_uniq_rural, collapse::funique(svy_tst_rural[j]))
-  #   }
-  # }
-  #
-  # var_uniq_rural <- var_uniq_rural[-1]
-
-  var_dist <- collapse::fndistinct(svy_tst_rural, na.rm = FALSE)
-  uniq     <- var_dist[var_dist==1]
-  var_uniq_rural <- collapse::funique(svy_tst_rural|>
-                                  collapse::fselect(names(uniq)))
-
-
-  svy_tst_urban <- svy_tst[svy_tst$reporting_level=="urban",]
-
-  # var_uniq_urban <- c(0)
-  #
-  # for(j in 1:length(svy_tst_urban)){
-  #   uniq <- collapse::fndistinct(svy_tst_urban[j], na.rm = FALSE)
-  #   if(uniq==1){
-  #     var_uniq_urban <- cbind(var_uniq_urban, collapse::funique(svy_tst_urban[j]))
-  #   }
-  # }
-  #
-  # var_uniq_urban <- var_uniq_urban[-1]
-
-  var_dist <- collapse::fndistinct(svy_tst_urban, na.rm = FALSE)
-  uniq     <- var_dist[var_dist==1]
-  var_uniq_urban <- collapse::funique(svy_tst_urban|>
-                                  collapse::fselect(names(uniq)))
-
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Create new dataset   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -87,6 +44,23 @@ fk_cache_imputed_gen <- function(pip_files,
     n_obs_rural <- round(n_obs*(1/3))
     n_obs_urban <- n_obs - n_obs_rural
   }
+
+  svy_tst <- svy_tst[[1]]
+
+  svy_tst_rural <- svy_tst[svy_tst$reporting_level=="rural",]
+
+  var_dist <- collapse::fndistinct(svy_tst_rural, na.rm = FALSE)
+  uniq     <- var_dist[var_dist==1]
+  var_uniq_rural <- collapse::funique(svy_tst_rural|>
+                                        collapse::fselect(names(uniq)))
+
+
+  svy_tst_urban <- svy_tst[svy_tst$reporting_level=="urban",]
+
+  var_dist <- collapse::fndistinct(svy_tst_urban, na.rm = FALSE)
+  uniq     <- var_dist[var_dist==1]
+  var_uniq_urban <- collapse::funique(svy_tst_urban|>
+                                        collapse::fselect(names(uniq)))
 
   fake_svy <- collapse::rowbind(var_uniq_rural[rep(1,each=n_obs_rural),],
                                 var_uniq_urban[rep(1,each=n_obs_urban),])
@@ -116,7 +90,6 @@ fk_cache_imputed_gen <- function(pip_files,
 
   lw_vec_all <- lw_vec_all[-1]
   w_vec_rural <- exp(lw_vec_all)
-
   w_vec_rural <- w_vec_rural + 1 + abs(min(svy_tst_rural$welfare))
 
   ### Urban
