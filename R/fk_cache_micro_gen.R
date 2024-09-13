@@ -45,17 +45,15 @@ fk_cache_micro_gen <- function(pip_files,
   # Household and Person ID   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  n_hh <- round(n_obs/2)
-
+  n_hh    <- round(n_obs/2)
   n_id_hh <- round(stats::rpois(n_hh, 2))
-
   n_id_hh <- rep(n_id_hh[n_id_hh!=0],4)
 
-  fake_svy$hhid <- rep(1:n_hh,times = n_id_hh[1:n_hh])[1:n_obs]
-
-  fake_svy <- data.table::setDT(fake_svy)
-
-  fake_svy$pid <- data.table::rowidv(fake_svy, cols = "hhid")
+  fake_svy <- fake_svy[
+    , hhid := rep(1:n_hh,times = n_id_hh[1:n_hh])[1:n_obs]
+  ][
+    , pid := data.table::rowidv(fake_svy, cols = "hhid")
+  ]
 
   n_hh <- collapse::fndistinct(fake_svy$hhid)
 
@@ -64,20 +62,25 @@ fk_cache_micro_gen <- function(pip_files,
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-  if(!("gender" %in% names(fake_svy))){
-
-    fake_svy$gender <- sample(c("male","female"),
-                             nrow(fake_svy),
-                             prob=c(0.5,0.5),
-                             replace =TRUE)
-  }
+  # if(!("gender" %in% names(fake_svy))){
+  #
+  #   fake_svy$gender <- sample(c("male","female"),
+  #                            nrow(fake_svy),
+  #                            prob=c(0.5,0.5),
+  #                            replace =TRUE)
+  # }
 
   #if(!("area" %in% names(fake_svy))){
 
   #Note: generate area according to new hhid
 
-  fake_svy <- fake_svy[, c("area") := sample(c("urban","rural"), 1,
-                              prob = c(0.3,0.7)), by = c("hhid")]
+  fake_svy <- fake_svy[
+    , c("gender") := sample(c("male","female"),nrow(fake_svy),
+                            prob=c(0.5,0.5), replace =TRUE)
+  ][
+    , c("area") := sample(c("urban","rural"), 1,
+                              prob = c(0.3,0.7)), by = c("hhid")
+    ]
 
   #}
 
@@ -113,7 +116,9 @@ fk_cache_micro_gen <- function(pip_files,
                     match_type = "m:1",
                     reportvar = FALSE,
                     verbose = FALSE)
-  fake_svy$weight <- 1/n_obs
+  fake_svy <- fake_svy[
+    , weight := 1/n_obs
+  ]
 
   # As performed in pip_ingestion_pipeline::process_svy_data_to_cache:
 
