@@ -21,8 +21,6 @@ fk_pip <- function(input_path = NULL,
 
   if(is.null(output_path)){
     output_path <- getwd()
-  }{
-
   }
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -53,9 +51,19 @@ fk_pip <- function(input_path = NULL,
 
     # new_folder <- file.path(versions[1],"survey_data")
 
-    new_folder <- file.path(basename(input_path),"survey_data")
+    new_folders <- file.path(basename(input_path),
+                            basename(fs::dir_ls(input_path, type = "directory")))
 
-    fs::dir_create(new_folder)
+    fs::dir_create(path = output_path, new_folders)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ## Survey data --------
+
+
+
+
+
+
 
 
   }
@@ -63,9 +71,31 @@ fk_pip <- function(input_path = NULL,
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## Create empty folders --------
 
-  new_folder <- file.path("20240627_2017_01_02_PROD","survey_data")
+  new_folders <- file.path("20240627_2017_01_02_PROD",c("survey_data",
+                                                       "estimations",
+                                                       "_aux"))
 
-  fs::dir_create(new_folder)
+  fs::dir_create(path = output_path, new_folders)
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Survey Data   ---------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ## Randomized data --------
+
+  svy_ls <- fs::dir_ls(fs::path(input_path,"survey_data"))
+
+  tst <- fk_cache_micro_gen(svy_ls)
+
+
+
+
+
+
+
 
 
 
