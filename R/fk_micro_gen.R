@@ -112,6 +112,9 @@ fk_micro_gen <- function(pip_files,
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Return   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  fake_svy <-  fake_svy|>
+    collapse::fselect(names(svy_tst[[1]]))
+
   return(fake_svy)
 
 }
