@@ -60,14 +60,17 @@ fk_pip <- function(input_path = NULL,
 
 
 
+
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     ## Randomized data --------
 
     svy_ls <- fs::dir_ls(fs::path(input_path,"survey_data"))
 
-    fk_svy <- fk_micro_gen(svy_ls)
 
-    fst::write_fst(fk_svy, path = fs::path(output_path,new_folders[2],"svy_1.fst"))
+    fk_svy_gen(svy_ls, nm_svy) # Any output needed?
+
+
 
 
 
@@ -100,6 +103,35 @@ fk_pip <- function(input_path = NULL,
 
 
 
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Return   ---------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  return(TRUE)
+
+}
+
+fk_svy_gen <- function(svy_ls,
+                       n_svy = 100) {
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Separate by distribution type (maybe create func for this)   ---------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  nm_svy <- tools::file_path_sans_ext(basename(svy_ls))
+
+  svy_inf <- setDT(as.data.frame(nm_svy))[
+    , tstrsplit(nm_svy, "_", names = c("country_code", "year", "survey_name",
+                                       "rep_level", "welfare_type", "distribution_type"))
+  ]
+
+  collapse::add_vars(svy_inf) <- nm_svy
+
+  # filter for each dist type and select those in svy_ls
+
+  fk_svy <- fk_micro_gen(svy_ls)
+
+  fst::write_fst(fk_svy, path = fs::path(output_path,new_folders[2],"svy_1.fst"))
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Return   ---------
