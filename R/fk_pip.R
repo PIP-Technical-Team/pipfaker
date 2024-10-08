@@ -8,8 +8,6 @@
 #' @param output_path where to create new folder
 #'
 #' @return folder
-#'
-#' @examples
 fk_pip <- function(input_path = NULL,
                    output_path = NULL) {
 
@@ -56,8 +54,22 @@ fk_pip <- function(input_path = NULL,
 
     fs::dir_create(path = output_path, new_folders)
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Survey Data   ---------
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    ## Survey data --------
+    ## Randomized data --------
+
+    svy_ls <- fs::dir_ls(fs::path(input_path,"survey_data"))
+
+    fk_svy <- fk_micro_gen(svy_ls)
+
+    fst::write_fst(fk_svy, path = fs::path(output_path,new_folders[2],"svy_1.fst"))
+
+
 
 
 
@@ -71,24 +83,13 @@ fk_pip <- function(input_path = NULL,
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## Create empty folders --------
 
+  input_path <- "E:/PIP/pipapi_data/20240627_2017_01_02_PROD"
+
   new_folders <- file.path("20240627_2017_01_02_PROD",c("survey_data",
                                                        "estimations",
                                                        "_aux"))
 
   fs::dir_create(path = output_path, new_folders)
-
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Survey Data   ---------
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ## Randomized data --------
-
-  svy_ls <- fs::dir_ls(fs::path(input_path,"survey_data"))
-
-  tst <- fk_cache_micro_gen(svy_ls)
 
 
 
