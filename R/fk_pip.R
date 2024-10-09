@@ -4,21 +4,27 @@
 #' needed for the PIP API either by using data from a specific path
 #' (given by the user) or using the fixed fake data found in this package
 #'
-#' @param input_path file address to the PIP API data
 #' @param output_path where to create new folder
+#' @param input_path file address to the PIP API data. Default is..
+#' @param n_svy Number of surveys in the `survey_data` folder. Default is the
+#' 600 (almost 1/4 of no. surveys in 2024)
 #'
 #' @return folder
-fk_pip <- function(input_path = NULL,
-                   output_path = NULL) {
+fk_pip <- function(output_path,
+                   input_path = NULL,
+                   n_svy = 600) {
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Checks   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  # Checks on path existence
+  # Checks output path exists
 
   if(is.null(output_path)){
-    output_path <- getwd()
+
+    cli::cli_abort("Please specify the output_path",wrap = TRUE)
+    #output_path <- getwd()
+    #output_path <- "E:/PovcalNet/01.personal/wb535623/PIP/temp"
   }
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -58,35 +64,16 @@ fk_pip <- function(input_path = NULL,
     # Survey Data   ---------
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
-
-
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    ## Randomized data --------
-
     svy_ls <- fs::dir_ls(fs::path(input_path,"survey_data"))
 
-
-    fk_svy_gen(svy_ls, nm_svy) # Any output needed?
-
-
-
-
-
-
-
-
-
-
-
+    svy_nm <- replicate(n_svy, fk_svy_gen(svy_ls, output_path, input_path))
 
   }
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## Create empty folders --------
 
-  input_path <- "E:/PIP/pipapi_data/20240627_2017_01_02_PROD"
+  #input_path <- "E:/PIP/pipapi_data/20240627_2017_01_02_PROD"
 
   new_folders <- file.path("20240627_2017_01_02_PROD",c("survey_data",
                                                        "estimations",
@@ -112,30 +99,39 @@ fk_pip <- function(input_path = NULL,
 }
 
 fk_svy_gen <- function(svy_ls,
-                       n_svy = 100) {
+                       output_path,
+                       input_path) {
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Separate by distribution type (maybe create func for this)   ---------
+  # Identify the info of svy---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   nm_svy <- tools::file_path_sans_ext(basename(svy_ls))
 
-  svy_inf <- setDT(as.data.frame(nm_svy))[
-    , tstrsplit(nm_svy, "_", names = c("country_code", "year", "survey_name",
-                                       "rep_level", "welfare_type", "distribution_type"))
-  ]
+  # svy_inf <- setDT(as.data.frame(nm_svy))[
+  #   , tstrsplit(nm_svy, "_", names = c("country_code", "year", "survey_name",
+  #                                      "rep_level", "welfare_type", "distribution_type"))
+  # ]
+  #
+  # collapse::add_vars(svy_inf) <- nm_svy
 
-  collapse::add_vars(svy_inf) <- nm_svy
+  # Note: This dataset treats all like microdata. We might need to filter for
+  # each dist type and select those in svy_ls.
 
-  # filter for each dist type and select those in svy_ls
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Generate fake survey   ---------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  fk_svy <- fk_micro_gen(svy_ls)
+  fk_svy <- fk_micro_gen(svy_ls, n_obs = sample(500:1000,1))
 
-  fst::write_fst(fk_svy, path = fs::path(output_path,new_folders[2],"svy_1.fst"))
+  rnd_name <- sample(nm_svy, 1)
+
+  fst::write_fst(fk_svy,path = fs::path(output_path,basename(input_path),
+                                 "survey_data",paste0(rnd_name, ".fst")))
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Return   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  return(TRUE)
+  return(rnd_name)
 
 }
