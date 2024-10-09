@@ -100,6 +100,12 @@ fk_pip <- function(output_path = NULL,
 
 }
 
+#' Function to write new fake survey in `survey_data` folder
+#'
+#' @param svy_ls list of real surveys
+#' @inheritParams fk_pip
+#'
+#' @return character fake name of survey
 fk_svy_gen <- function(svy_ls,
                        output_path,
                        input_path) {
