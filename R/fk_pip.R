@@ -6,13 +6,12 @@
 #'
 #' @param output_path where to create new folder
 #' @param input_path file address to the PIP API data. Default is..
-#' @param n_svy Number of surveys in the `survey_data` folder. Default is the
-#' 600 (almost 1/4 of no. surveys in 2024)
+#' @param n_svy Number of surveys in the `survey_data` folder. Default is the 50.
 #'
 #' @return folder
-fk_pip <- function(output_path,
+fk_pip <- function(output_path = NULL,
                    input_path = NULL,
-                   n_svy = 600) {
+                   n_svy = 50) {
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Checks   ---------
@@ -68,12 +67,15 @@ fk_pip <- function(output_path,
 
     svy_nm <- replicate(n_svy, fk_svy_gen(svy_ls, output_path, input_path))
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Return   ---------
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    return(svy_nm)
+
   }
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## Create empty folders --------
-
-  #input_path <- "E:/PIP/pipapi_data/20240627_2017_01_02_PROD"
 
   new_folders <- file.path("20240627_2017_01_02_PROD",c("survey_data",
                                                        "estimations",
@@ -81,20 +83,20 @@ fk_pip <- function(output_path,
 
   fs::dir_create(path = output_path, new_folders)
 
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Survey Data   ---------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+  input_path <- "E:/PIP/pipapi_data/20240627_2017_01_02_PROD"
 
+  svy_ls <- fs::dir_ls(fs::path(input_path,"survey_data"))
 
-
-
-
-
-
-
+  svy_nm <- replicate(n_svy, fk_svy_gen(svy_ls, output_path, input_path))
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Return   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  return(TRUE)
+  return(svy_nm)
 
 }
 
