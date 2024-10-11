@@ -106,7 +106,8 @@ fk_pip <- function(output_path = NULL,
 #' @inheritParams fk_pip
 #'
 #' @return character fake name of survey
-fk_svy_gen <- function(svy_ls,
+fk_svy_gen <- function(svy,
+                       n_obs = 400,
                        output_path,
                        input_path) {
 
@@ -114,7 +115,7 @@ fk_svy_gen <- function(svy_ls,
   # Identify the info of svy---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  nm_svy <- tools::file_path_sans_ext(basename(svy_ls))
+  # nm_svy <- tools::file_path_sans_ext(basename(svy_ls))
 
   # svy_inf <- setDT(as.data.frame(nm_svy))[
   #   , tstrsplit(nm_svy, "_", names = c("country_code", "year", "survey_name",
@@ -130,16 +131,86 @@ fk_svy_gen <- function(svy_ls,
   # Generate fake survey   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  fk_svy <- fk_micro_gen(svy_ls, n_obs = sample(500:1000,1))
-
-  rnd_name <- sample(nm_svy, 1)
-
-  fst::write_fst(fk_svy,path = fs::path(output_path,basename(input_path),
-                                 "survey_data",paste0(rnd_name, ".fst")))
+  # fk_svy <- fk_micro_gen(svy_ls, n_obs = sample(500:1000,1))
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Return   ---------
+  # Create new data set   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  fk_svy <- fk_uniq(svy, n_obs)
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Household and Person ID   ---------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  n_hh <- round(n_obs/2)
+  n_id_hh <- round(stats::rpois(n_hh, 2))
+  n_id_hh <- rep(n_id_hh[n_id_hh!=0],4)
+
+  fk_svy <- fk_svy[
+    , hhid := rep(1:n_hh,times = n_id_hh[1:n_hh])[1:n_obs]
+  ][
+    , pid := data.table::rowidv(fk_svy, cols = "hhid")
+  ]
+
+  n_hh <- collapse::fndistinct(fk_svy$hhid)
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Gender and Area   ---------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  #Note: generate area according to new hhid
+
+  fk_svy <- fk_svy[
+    , c("gender") := sample(c("male","female"),nrow(fk_svy),
+                            prob=c(0.5,0.5), replace =TRUE)
+  ][
+    , c("area") := sample(c("urban","rural"), 1,
+                          prob = c(0.3,0.7)), by = c("hhid")
+  ]
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Wealth and Weight   ---------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  # Note: The sampling does not account for size of the household
+  # (larger households tend to have higher consumption/income) and
+  # it does not differentiate between consumption and income
+
+  w_vec <- svy$welfare[!is.na(svy$welfare)]
+  w_vec <- unique(w_vec)
+  min_svy <- min(w_vec)
+  lw_vec <- log(w_vec + 1 + abs(min_svy))
+  lw_vec_sc <- scale(lw_vec)
+  lw_vec_smp <- sample(lw_vec_sc, n_obs, replace = TRUE)
+  fk_w_vec <- exp(lw_vec_smp + 1 + abs(min_svy))
+
+  fk_w_vec <- data.frame(hhid = c(1:n_hh),
+                          welfare = fk_w_vec)
+
+  fk_svy <- joyn::joyn(fk_svy, fk_w_vec,
+                         by = "hhid",
+                         match_type = "m:1",
+                         reportvar = FALSE,
+                         verbose = FALSE)
+
+  fk_svy <- fk_svy[
+    , weight := 1/n_obs
+  ]
+
+  fk_svy <-  fk_svy|>
+    collapse::fselect(names(svy))
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Print and Return   ---------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  rnd_name <- xxx
+
+  fst::write_fst(fk_svy,path = fs::path(output_path,
+                                        basename(input_path),
+                                        "survey_data",paste0(rnd_name, ".fst")))
+
   return(rnd_name)
 
 }
