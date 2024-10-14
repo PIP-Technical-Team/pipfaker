@@ -102,10 +102,11 @@ fk_pip <- function(output_path = NULL,
 
 #' Function to write new fake survey in `survey_data` folder
 #'
-#' @param svy_ls list of real surveys
+#' @param svy Real survey
+#' @param n_obs Observations for fake survey
 #' @inheritParams fk_pip
 #'
-#' @return character fake name of survey
+#' @return character name of survey
 fk_svy_gen <- function(svy,
                        n_obs = 400,
                        output_path,
@@ -115,7 +116,7 @@ fk_svy_gen <- function(svy,
   # Identify only svy ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  #svy <- svy_ls[[117]]
+  # svy <- svy_ls[[117]]
 
   svy_name <- basename(svy)
 
@@ -255,7 +256,7 @@ fk_svy_gen <- function(svy,
 #' output folder and eliminates the `_vintage` folder (made explicitly to copy
 #' `_aux` and `estimations` folders)
 #'
-#' @param dirs
+#' @param dirs Name of the directory to be copy
 #' @inheritParams fk_pip
 #'
 #' @return TRUE

@@ -4,17 +4,19 @@
 \alias{fk_svy_gen}
 \title{Function to write new fake survey in `survey_data` folder}
 \usage{
-fk_svy_gen(svy_ls, output_path, input_path)
+fk_svy_gen(svy, n_obs = 400, output_path, input_path)
 }
 \arguments{
-\item{svy_ls}{list of real surveys}
+\item{svy}{Real survey}
+
+\item{n_obs}{Observations for fake survey}
 
 \item{output_path}{where to create new folder}
 
 \item{input_path}{file address to the PIP API data. Default is..}
 }
 \value{
-character fake name of survey
+character name of survey
 }
 \description{
 Function to write new fake survey in `survey_data` folder

@@ -33,4 +33,5 @@ if(getRversion() >= "2.15.1")
                            'weight',
                            'datt',
                            'hhid',
-                           'pid'))
+                           'pid',
+                           'name'))
