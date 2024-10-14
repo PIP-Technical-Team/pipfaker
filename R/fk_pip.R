@@ -6,12 +6,10 @@
 #'
 #' @param output_path where to create new folder
 #' @param input_path file address to the PIP API data. Default is..
-#' @param n_svy Number of surveys in the `survey_data` folder. Default is the 50.
 #'
 #' @return folder
 fk_pip <- function(output_path = NULL,
-                   input_path = NULL,
-                   n_svy = 50) {
+                   input_path = NULL) {
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Checks   ---------
@@ -23,7 +21,7 @@ fk_pip <- function(output_path = NULL,
 
     cli::cli_abort("Please specify the output_path",wrap = TRUE)
     #output_path <- getwd()
-    #output_path <- "E:/PovcalNet/01.personal/wb535623/PIP/temp"
+    output_path <- "E:/PovcalNet/01.personal/wb535623/PIP/temp"
   }
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -65,7 +63,9 @@ fk_pip <- function(output_path = NULL,
 
     svy_ls <- fs::dir_ls(fs::path(input_path,"survey_data"))
 
-    svy_nm <- replicate(n_svy, fk_svy_gen(svy_ls, output_path, input_path))
+    svys <- sapply(svy_ls, fk_svy_gen(output_path, input_path))
+
+    #svy_nm <- replicate(n_svy, fk_svy_gen(svy_ls, output_path, input_path))
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Return   ---------
@@ -91,7 +91,13 @@ fk_pip <- function(output_path = NULL,
 
   svy_ls <- fs::dir_ls(fs::path(input_path,"survey_data"))
 
-  svy_nm <- replicate(n_svy, fk_svy_gen(svy_ls, output_path, input_path))
+  #svy_nm <- replicate(n_svy, fk_svy_gen(svy_ls, output_path, input_path))
+
+  svys <- sapply(svy_ls,
+                 fk_svy_gen, output_path = output_path,
+                                    input_path = input_path,
+                                    n_obs = 400,
+                 simplify = TRUE)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Return   ---------
@@ -137,7 +143,31 @@ fk_svy_gen <- function(svy,
   # Create new data set   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  fk_svy <- fk_uniq(svy, n_obs)
+  #svy <- svy_ls[[1935]]
+
+  svy_name <- basename(svy)
+
+  svy_org <- load_files_pip(svy)
+
+  if(all(is.na(svy_org))){
+
+    fst::write_fst(svy_org,
+                   path = fs::path(output_path,
+                                   basename(input_path),
+                                   "survey_data",
+                                   paste0(svy_name)))
+    print(svy_name)
+
+    return(svy_name)
+  }
+
+  var_svy <- names(svy_org)
+
+  svy_org <- svy_org[
+    , name := svy_name
+  ]
+
+  fk_svy <- fk_uniq(svy_org, n_obs)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Household and Person ID   ---------
@@ -177,12 +207,12 @@ fk_svy_gen <- function(svy,
   # (larger households tend to have higher consumption/income) and
   # it does not differentiate between consumption and income
 
-  w_vec <- svy$welfare[!is.na(svy$welfare)]
+  w_vec <- svy_org$welfare[!is.na(svy_org$welfare)]
   w_vec <- unique(w_vec)
   min_svy <- min(w_vec)
   lw_vec <- log(w_vec + 1 + abs(min_svy))
   lw_vec_sc <- scale(lw_vec)
-  lw_vec_smp <- sample(lw_vec_sc, n_obs, replace = TRUE)
+  lw_vec_smp <- sample(lw_vec_sc, n_hh, replace = TRUE)
   fk_w_vec <- exp(lw_vec_smp + 1 + abs(min_svy))
 
   fk_w_vec <- data.frame(hhid = c(1:n_hh),
@@ -199,18 +229,19 @@ fk_svy_gen <- function(svy,
   ]
 
   fk_svy <-  fk_svy|>
-    collapse::fselect(names(svy))
+    collapse::fselect(var_svy)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Print and Return   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  rnd_name <- xxx
 
-  fst::write_fst(fk_svy,path = fs::path(output_path,
-                                        basename(input_path),
-                                        "survey_data",paste0(rnd_name, ".fst")))
+  fst::write_fst(fk_svy,
+                 path = fs::path(output_path,
+                                 basename(input_path),
+                                 "survey_data",
+                                 paste0(svy_name)))
 
-  return(rnd_name)
+  return(svy_name)
 
 }
