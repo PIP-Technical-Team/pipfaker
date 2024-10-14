@@ -56,51 +56,47 @@ fk_pip <- function(output_path = NULL,
                    simplify = TRUE,
                    USE.NAMES = FALSE)
 
+  }else{
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ## Create empty folders --------
+
+    new_folders <- file.path("20240627_2017_01_02_PROD",c("survey_data",
+                                                          "estimations",
+                                                          "_aux"))
+
+    fs::dir_create(path = output_path, new_folders)
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Add Aux Files and Estimations  ---------
+    # Survey Data   ---------
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    dirs <- list("_aux","estimations")
+    input_path <- "E:/PIP/pipapi_data/20240627_2017_01_02_PROD"
 
-    lapply(dirs, copy_dirs,
-           input_path = input_path,
-           output_path = output_path)
+    svy_ls <- fs::dir_ls(fs::path(input_path,"survey_data"))
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Return   ---------
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    return(TRUE)
-
+    svys <- sapply(svy_ls,
+                   fk_svy_gen, output_path = output_path,
+                   input_path = input_path,
+                   n_obs = 400,
+                   simplify = TRUE,
+                   USE.NAMES = FALSE)
   }
 
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ## Create empty folders --------
-
-  new_folders <- file.path("20240627_2017_01_02_PROD",c("survey_data",
-                                                       "estimations",
-                                                       "_aux"))
-
-  fs::dir_create(path = output_path, new_folders)
-
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Survey Data   ---------
+  # Add Aux Files and Estimations  ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  input_path <- "E:/PIP/pipapi_data/20240627_2017_01_02_PROD"
+  dirs <- list("_aux","estimations")
 
-  svy_ls <- fs::dir_ls(fs::path(input_path,"survey_data"))
-
-  svys <- sapply(svy_ls,
-                 fk_svy_gen, output_path = output_path,
-                                    input_path = input_path,
-                                    n_obs = 400,
-                 simplify = TRUE,
-                 USE.NAMES = FALSE)
+  lapply(dirs, copy_dirs,
+         input_path = input_path,
+         output_path = output_path)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Return   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  return(svys)
+  return(TRUE)
 
 }
 
