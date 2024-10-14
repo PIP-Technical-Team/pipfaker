@@ -21,7 +21,7 @@ fk_pip <- function(output_path = NULL,
 
     cli::cli_abort("Please specify the output_path",wrap = TRUE)
     #output_path <- getwd()
-    output_path <- "E:/PovcalNet/01.personal/wb535623/PIP/temp"
+    #output_path <- "E:/PovcalNet/01.personal/wb535623/PIP/temp"
   }
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -63,14 +63,17 @@ fk_pip <- function(output_path = NULL,
 
     svy_ls <- fs::dir_ls(fs::path(input_path,"survey_data"))
 
-    svys <- sapply(svy_ls, fk_svy_gen(output_path, input_path))
-
-    #svy_nm <- replicate(n_svy, fk_svy_gen(svy_ls, output_path, input_path))
+    svys <- sapply(svy_ls,
+                   fk_svy_gen, output_path = output_path,
+                   input_path = input_path,
+                   n_obs = 400,
+                   simplify = TRUE,
+                   USE.NAMES = FALSE)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Return   ---------
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    return(svy_nm)
+    return(svys)
 
   }
 
@@ -91,18 +94,17 @@ fk_pip <- function(output_path = NULL,
 
   svy_ls <- fs::dir_ls(fs::path(input_path,"survey_data"))
 
-  #svy_nm <- replicate(n_svy, fk_svy_gen(svy_ls, output_path, input_path))
-
   svys <- sapply(svy_ls,
                  fk_svy_gen, output_path = output_path,
                                     input_path = input_path,
                                     n_obs = 400,
-                 simplify = TRUE)
+                 simplify = TRUE,
+                 USE.NAMES = FALSE)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Return   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  return(svy_nm)
+  return(svys)
 
 }
 
