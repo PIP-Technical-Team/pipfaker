@@ -57,40 +57,17 @@ fk_pip <- function(output_path = NULL,
                    USE.NAMES = FALSE)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Add Aux Files   ---------
+    # Add Aux Files and Estimations  ---------
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    fs::dir_copy(path = fs::path(input_path,"_aux"),
-                  new_path = fs::path(output_path,
-                                      basename(input_path),
-                                      "_aux"),
-                 overwrite = TRUE)
+    dirs <- list("_aux","estimations")
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    ## Remove _vintage folder --------
-
-    vintage_path <- fs::path(output_path,
-                             basename(input_path),
-                             "_aux","_vintage")
-
-    if(fs::dir_exists(vintage_path)){
-
-      fs::dir_delete(vintage_path)
-
-    }
-
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Add Estimations   ---------
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-
-
+    lapply(dirs, copy_dirs)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Return   ---------
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    return(svys)
+    return(TRUE)
 
   }
 
@@ -271,5 +248,37 @@ fk_svy_gen <- function(svy,
                                  paste0(svy_name)))
 
   return(svy_name)
+
+}
+
+copy_dirs <- function(dirs) {
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # computations   ---------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  fs::dir_copy(path = fs::path(input_path,dirs),
+               new_path = fs::path(output_path,
+                                   basename(input_path),
+                                   dirs),
+               overwrite = TRUE)
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ## Remove _vintage folder --------
+
+  vintage_path <- fs::path(output_path,
+                           basename(input_path),
+                           dirs,"_vintage")
+
+  if(fs::dir_exists(vintage_path)){
+
+    fs::dir_delete(vintage_path)
+
+  }
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Return   ---------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  return(TRUE)
 
 }
