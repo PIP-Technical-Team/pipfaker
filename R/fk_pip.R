@@ -15,13 +15,15 @@ fk_pip <- function(output_path = NULL,
   # Checks   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  # Checks output path exists
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ## Checks output path exists --------
+
+  # output_path <- "E:/PovcalNet/01.personal/wb535623/PIP/temp"
 
   if(is.null(output_path)){
 
     cli::cli_abort("Please specify the output_path",wrap = TRUE)
-    #output_path <- getwd()
-    #output_path <- "E:/PovcalNet/01.personal/wb535623/PIP/temp"
+
   }
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -31,26 +33,9 @@ fk_pip <- function(output_path = NULL,
 
   if(!is.null(input_path)){
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    ## Create empty folders --------
-
-    # List data directories under input_path
-
-    # data_dirs  <- fs::dir_ls(input_path, type = "directory")
-    # dirs_names <- basename(data_dirs)
-
-    # vintage_pattern <-  pipapi:::create_vintage_pattern_call()
-    # valid_dir <- pipapi:::id_valid_dirs(dirs_names      = dirs_names,
-    #                            vintage_pattern = vintage_pattern$vintage_pattern)
-
-    #valid_dir <- grepl("\\d{8}_\\d{4}_\\d{2}_\\d{2}_(PROD|TEST|INT)$", dirs_names)
-
-    # data_dirs  <- data_dirs[valid_dir]
-    # versions   <- dirs_names[valid_dir]
-
-    # names(data_dirs) <- versions
-
-    # new_folder <- file.path(versions[1],"survey_data")
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Create empty folders   ---------
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     new_folders <- file.path(basename(input_path),
                             basename(fs::dir_ls(input_path, type = "directory")))
@@ -58,17 +43,49 @@ fk_pip <- function(output_path = NULL,
     fs::dir_create(path = output_path, new_folders)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Survey Data   ---------
+    # Add Survey Data   ---------
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     svy_ls <- fs::dir_ls(fs::path(input_path,"survey_data"))
 
     svys <- sapply(svy_ls,
-                   fk_svy_gen, output_path = output_path,
+                   fk_svy_gen,
+                   output_path = output_path,
                    input_path = input_path,
                    n_obs = 400,
                    simplify = TRUE,
                    USE.NAMES = FALSE)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Add Aux Files   ---------
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    fs::dir_copy(path = fs::path(input_path,"_aux"),
+                  new_path = fs::path(output_path,
+                                      basename(input_path),
+                                      "_aux"),
+                 overwrite = TRUE)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ## Remove _vintage folder --------
+
+    vintage_path <- fs::path(output_path,
+                             basename(input_path),
+                             "_aux","_vintage")
+
+    if(fs::dir_exists(vintage_path)){
+
+      fs::dir_delete(vintage_path)
+
+    }
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Add Estimations   ---------
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Return   ---------
@@ -120,36 +137,43 @@ fk_svy_gen <- function(svy,
                        input_path) {
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Identify the info of svy---------
+  # Identify only svy ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  # nm_svy <- tools::file_path_sans_ext(basename(svy_ls))
+  #svy <- svy_ls[[117]]
 
-  # svy_inf <- setDT(as.data.frame(nm_svy))[
-  #   , tstrsplit(nm_svy, "_", names = c("country_code", "year", "survey_name",
-  #                                      "rep_level", "welfare_type", "distribution_type"))
-  # ]
-  #
+  svy_name <- basename(svy)
+
+  nm_svy <- tools::file_path_sans_ext(svy_name)
+
+  svy_inf <- data.table::setDT(as.data.frame(nm_svy))[
+    , data.table::tstrsplit(nm_svy, "_",
+                names = c("country_code",
+                          "year",
+                          "survey_name",
+                          "rep_level",
+                          "welfare_type",
+                          "distribution_type"))
+  ]
+
   # collapse::add_vars(svy_inf) <- nm_svy
 
-  # Note: This dataset treats all like microdata. We might need to filter for
-  # each dist type and select those in svy_ls.
+  svy_org <- load_files_pip(svy)
+
+  if(svy_inf$distribution_type %in% c("GROUP","BIN")){
+
+    fst::write_fst(svy_org,
+                   path = fs::path(output_path,
+                                   basename(input_path),
+                                   "survey_data",
+                                   paste0(svy_name)))
+
+    return(svy_name)
+  }
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Generate fake survey   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-  # fk_svy <- fk_micro_gen(svy_ls, n_obs = sample(500:1000,1))
-
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Create new data set   ---------
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-  #svy <- svy_ls[[1935]]
-
-  svy_name <- basename(svy)
-
-  svy_org <- load_files_pip(svy)
 
   if(all(is.na(svy_org))){
 
@@ -158,7 +182,9 @@ fk_svy_gen <- function(svy,
                                    basename(input_path),
                                    "survey_data",
                                    paste0(svy_name)))
-    print(svy_name)
+
+    cli::cli_alert_warning("The survey called {.val {svy_name}} from {.path {input_path}}
+                           has only NA values.")
 
     return(svy_name)
   }
