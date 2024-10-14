@@ -62,7 +62,9 @@ fk_pip <- function(output_path = NULL,
 
     dirs <- list("_aux","estimations")
 
-    lapply(dirs, copy_dirs)
+    lapply(dirs, copy_dirs,
+           input_path = input_path,
+           output_path = output_path)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Return   ---------
@@ -251,7 +253,19 @@ fk_svy_gen <- function(svy,
 
 }
 
-copy_dirs <- function(dirs) {
+#' Copy files from a folder
+#'
+#' This function copy files using `fs::dir_copy` from and input folder to an
+#' output folder and eliminates the `_vintage` folder (made explicitly to copy
+#' `_aux` and `estimations` folders)
+#'
+#' @param dirs
+#' @inheritParams fk_pip
+#'
+#' @return TRUE
+copy_dirs <- function(dirs,
+                      output_path,
+                      input_path) {
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # computations   ---------
