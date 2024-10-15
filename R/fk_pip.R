@@ -201,9 +201,15 @@ fk_svy_gen <- function(svy,
 
   w_vec <- svy_org$welfare[!is.na(svy_org$welfare)]
 
-  fk_svy <- gen_welf_wg(fk_svy,
+  fk_svy <- gen_welf(fk_svy,
                         w_vec,
                         n_hh)
+
+  ### Weight (subject to change) ---------
+
+  fk_svy <- fk_svy[
+    , weight := 1/n_obs
+  ]
 
 
   fk_svy <-  fk_svy|>
@@ -291,7 +297,7 @@ gen_hh_pid <- function(fk_svy,
 
 }
 
-gen_welf_wg <- function(fk_svy,
+gen_welf <- function(fk_svy,
                         w_vec,
                         n_hh) {
 
@@ -318,10 +324,6 @@ gen_welf_wg <- function(fk_svy,
                        match_type = "m:1",
                        reportvar = FALSE,
                        verbose = FALSE)
-
-  fk_svy <- fk_svy[
-    , weight := 1/n_obs
-  ]
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Return   ---------
