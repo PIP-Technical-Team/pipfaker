@@ -177,15 +177,7 @@ fk_svy_gen <- function(svy,
   # Household and Person ID   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  n_hh <- round(n_obs/2)
-  n_id_hh <- round(stats::rpois(n_hh, 2))
-  n_id_hh <- rep(n_id_hh[n_id_hh!=0],4)
-
-  fk_svy <- fk_svy[
-    , hhid := rep(1:n_hh,times = n_id_hh[1:n_hh])[1:n_obs]
-  ][
-    , pid := data.table::rowidv(fk_svy, cols = "hhid")
-  ]
+  fk_svy <- gen_hh_pid(fk_svy, n_obs)
 
   n_hh <- collapse::fndistinct(fk_svy$hhid)
 
@@ -204,33 +196,15 @@ fk_svy_gen <- function(svy,
   ]
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Wealth and Weight   ---------
+  # Welfare and Weight   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  # Note: The sampling does not account for size of the household
-  # (larger households tend to have higher consumption/income) and
-  # it does not differentiate between consumption and income
-
   w_vec <- svy_org$welfare[!is.na(svy_org$welfare)]
-  w_vec <- unique(w_vec)
-  min_svy <- min(w_vec)
-  lw_vec <- log(w_vec + 1 + abs(min_svy))
-  lw_vec_sc <- scale(lw_vec)
-  lw_vec_smp <- sample(lw_vec_sc, n_hh, replace = TRUE)
-  fk_w_vec <- exp(lw_vec_smp + 1 + abs(min_svy))
 
-  fk_w_vec <- data.frame(hhid = c(1:n_hh),
-                          welfare = fk_w_vec)
+  fk_svy <- gen_welf_wg(fk_svy,
+                        w_vec,
+                        n_hh)
 
-  fk_svy <- joyn::joyn(fk_svy, fk_w_vec,
-                         by = "hhid",
-                         match_type = "m:1",
-                         reportvar = FALSE,
-                         verbose = FALSE)
-
-  fk_svy <- fk_svy[
-    , weight := 1/n_obs
-  ]
 
   fk_svy <-  fk_svy|>
     collapse::fselect(var_svy)
@@ -238,7 +212,6 @@ fk_svy_gen <- function(svy,
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Print and Return   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 
   fst::write_fst(fk_svy,
                  path = fs::path(output_path,
@@ -291,5 +264,68 @@ copy_dirs <- function(dirs,
   # Return   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   return(TRUE)
+
+}
+
+
+gen_hh_pid <- function(fk_svy,
+                       n_obs) {
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # computations   ---------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  n_hh <- round(n_obs/2)
+  n_id_hh <- round(stats::rpois(n_hh, 2))
+  n_id_hh <- rep(n_id_hh[n_id_hh!=0],4)
+
+  fk_svy <- fk_svy[
+    , hhid := rep(1:n_hh,times = n_id_hh[1:n_hh])[1:n_obs]
+  ][
+    , pid := data.table::rowidv(fk_svy, cols = "hhid")
+  ]
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Return   ---------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  return(fk_svy)
+
+}
+
+gen_welf_wg <- function(fk_svy,
+                        w_vec,
+                        n_hh) {
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # computations   ---------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  # Note: The sampling does not account for size of the household
+  # (larger households tend to have higher consumption/income) and
+  # it does not differentiate between consumption and income
+
+  w_vec <- unique(w_vec)
+  min_svy <- min(w_vec)
+  lw_vec <- log(w_vec + 1 + abs(min_svy))
+  lw_vec_sc <- scale(lw_vec)
+  lw_vec_smp <- sample(lw_vec_sc, n_hh, replace = TRUE)
+  fk_w_vec <- exp(lw_vec_smp + 1 + abs(min_svy))
+
+  fk_w_vec <- data.frame(hhid = c(1:n_hh),
+                         welfare = fk_w_vec)
+
+  fk_svy <- joyn::joyn(fk_svy, fk_w_vec,
+                       by = "hhid",
+                       match_type = "m:1",
+                       reportvar = FALSE,
+                       verbose = FALSE)
+
+  fk_svy <- fk_svy[
+    , weight := 1/n_obs
+  ]
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Return   ---------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  return(fk_svy)
 
 }
