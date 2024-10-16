@@ -87,7 +87,7 @@ fk_pip <- function(output_path = NULL,
   # Add Aux Files and Estimations  ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  dirs <- list("_aux","estimations")
+  dirs <- list("_aux","estimations") # Make it soft coded
 
   lapply(dirs, copy_dirs,
          input_path = input_path,
@@ -96,7 +96,7 @@ fk_pip <- function(output_path = NULL,
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Return   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  return(TRUE)
+  return(invisible(TRUE))
 
 }
 
@@ -113,10 +113,10 @@ fk_svy_gen <- function(svy,
                        input_path) {
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Identify only svy ---------
+  # Identify svy type ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  # svy <- svy_ls[[117]]
+  svy <- svy_ls[[2]]
 
   svy_name <- basename(svy)
 
@@ -129,14 +129,14 @@ fk_svy_gen <- function(svy,
                           "survey_name",
                           "rep_level",
                           "welfare_type",
-                          "distribution_type"))
+                          "survey_type"))
   ]
 
   # collapse::add_vars(svy_inf) <- nm_svy
 
-  svy_org <- load_files_pip(svy)
+  svy_org2 <- load_files_pip(svy)
 
-  if(svy_inf$distribution_type %in% c("GROUP","BIN")){
+  if(svy_inf$survey_type %in% c("GROUP","BIN")){
 
     fst::write_fst(svy_org,
                    path = fs::path(output_path,
@@ -177,20 +177,31 @@ fk_svy_gen <- function(svy,
   # Household and Person ID   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  fk_svy <- gen_hh_pid(fk_svy, n_obs)
+  # tst <- lapply(svy_ls, function(x){
+  #   dta <- load_files_pip(x)
+  #   length(unique(dta$welfare[duplicated(dta$welfare)]))
+  # })
+  #
+  # fk_svy <- gen_hh_pid(fk_svy, n_obs)
+  #
+  # n_hh <- collapse::fndistinct(fk_svy$hhid)
 
-  n_hh <- collapse::fndistinct(fk_svy$hhid)
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ## If we use the no. hh from survey --------
+
+  n_hh_org <- collapse::fndistinct(svy_org$welfare)
+
+  n_hh <- round(n_hh_org*n_obs/nrow(svy_org))
+
+  fk_svy <- gen_hh_pid(fk_svy, n_obs, n_hh)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Gender and Area   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  #Note: generate area according to new hhid
+  #Note: generate area according to percentage
 
   fk_svy <- fk_svy[
-    , c("gender") := sample(c("male","female"),nrow(fk_svy),
-                            prob=c(0.5,0.5), replace =TRUE)
-  ][
     , c("area") := sample(c("urban","rural"), 1,
                           prob = c(0.3,0.7)), by = c("hhid")
   ]
@@ -275,12 +286,13 @@ copy_dirs <- function(dirs,
 
 
 gen_hh_pid <- function(fk_svy,
-                       n_obs) {
+                       n_obs,
+                       n_hh = round(n_obs/2)) {
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # computations   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  n_hh <- round(n_obs/2)
+  #n_hh <- round(n_obs/2)
   n_id_hh <- round(stats::rpois(n_hh, 2))
   n_id_hh <- rep(n_id_hh[n_id_hh!=0],4)
 
