@@ -30,4 +30,8 @@ if(getRversion() >= "2.15.1")
                            'cache_id',
                            'DV',
                            'reporting_level',
-                           'weight'))
+                           'weight',
+                           'datt',
+                           'hhid',
+                           'pid',
+                           'name'))
