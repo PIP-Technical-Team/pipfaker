@@ -292,8 +292,11 @@ gen_hh_pid <- function(fk_svy,
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # computations   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  # Runs a poison distribution with number of individuals per hh
+
   #n_hh <- round(n_obs/2)
-  n_id_hh <- round(stats::rpois(n_hh, 2))
+  n_id_hh <- round(stats::rpois(n_hh, n_obs/n_hh))
   n_id_hh <- rep(n_id_hh[n_id_hh!=0],4)
 
   fk_svy <- fk_svy[
