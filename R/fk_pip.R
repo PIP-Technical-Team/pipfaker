@@ -201,10 +201,20 @@ fk_svy_gen <- function(svy,
 
   #Note: generate area according to percentage
 
-  fk_svy <- fk_svy[
-    , c("area") := sample(c("urban","rural"), 1,
-                          prob = c(0.3,0.7)), by = c("hhid")
-  ]
+  if(all(!is.na(svy_org$area))){
+
+    area_tb <- prop.table(table(svy_org$area, useNA = "ifany"))
+
+    area_cat <- names(area_tb)
+
+    fk_svy <- fk_svy[
+        , c("area") := sample(area_cat,
+                               n_obs,
+                               replace = TRUE,
+                              prob =  as.numeric(area_tb))
+        #by = c("hhid")
+      ]
+  }
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Welfare and Weight   ---------
