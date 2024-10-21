@@ -179,7 +179,7 @@ fk_svy_gen <- function(svy,
 
   #Note: generate area according to percentage
 
-  if(all(!is.na(svy_org$area))){
+  if(!names(fk_svy) %in% c("area")){
 
     area_tb <- prop.table(table(svy_org$area, useNA = "ifany"))
 
@@ -190,7 +190,6 @@ fk_svy_gen <- function(svy,
                                n_obs,
                                replace = TRUE,
                               prob =  as.numeric(area_tb))
-        #by = c("hhid")
       ]
   }
 
