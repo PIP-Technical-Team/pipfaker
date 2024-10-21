@@ -38,7 +38,8 @@ fk_pip <- function(output_path = NULL,
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     new_folders <- file.path(basename(input_path),
-                            basename(fs::dir_ls(input_path, type = "directory")))
+                            basename(fs::dir_ls(input_path,
+                                                type = "directory")))
 
     fs::dir_create(path = output_path, new_folders)
 
@@ -113,10 +114,10 @@ fk_svy_gen <- function(svy,
                        input_path) {
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Identify svy type ---------
+  # Identify survey type and load ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  svy <- svy_ls[[2]]
+  # svy <- svy_ls[[2]]
 
   svy_name <- basename(svy)
 
@@ -132,9 +133,7 @@ fk_svy_gen <- function(svy,
                           "survey_type"))
   ]
 
-  # collapse::add_vars(svy_inf) <- nm_svy
-
-  svy_org2 <- load_files_pip(svy)
+  svy_org <- load_files_pip(svy)
 
   if(svy_inf$survey_type %in% c("GROUP","BIN")){
 
@@ -144,12 +143,9 @@ fk_svy_gen <- function(svy,
                                    "survey_data",
                                    paste0(svy_name)))
 
-    return(svy_name)
+    return(nm_svy)
   }
 
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Generate fake survey   ---------
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   if(all(is.na(svy_org))){
 
@@ -159,41 +155,23 @@ fk_svy_gen <- function(svy,
                                    "survey_data",
                                    paste0(svy_name)))
 
-    cli::cli_alert_warning("The survey called {.val {svy_name}} from {.path {input_path}}
-                           has only NA values.")
+    cli::cli_alert_warning("The survey called {.val {svy_name}}
+                           from {.path {input_path}} has only NA values.")
 
-    return(svy_name)
+    return(nm_svy)
   }
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Generate fake survey   ---------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   var_svy <- names(svy_org)
 
   svy_org <- svy_org[
-    , name := svy_name
+    , name := nm_svy
   ]
 
   fk_svy <- fk_uniq(svy_org, n_obs)
-
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Household and Person ID   ---------
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-  # tst <- lapply(svy_ls, function(x){
-  #   dta <- load_files_pip(x)
-  #   length(unique(dta$welfare[duplicated(dta$welfare)]))
-  # })
-  #
-  # fk_svy <- gen_hh_pid(fk_svy, n_obs)
-  #
-  # n_hh <- collapse::fndistinct(fk_svy$hhid)
-
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ## If we use the no. hh from survey --------
-
-  n_hh_org <- collapse::fndistinct(svy_org$welfare)
-
-  n_hh <- round(n_hh_org*n_obs/nrow(svy_org))
-
-  fk_svy <- gen_hh_pid(fk_svy, n_obs, n_hh)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Gender and Area   ---------
@@ -246,7 +224,7 @@ fk_svy_gen <- function(svy,
                                  "survey_data",
                                  paste0(svy_name)))
 
-  return(svy_name)
+  return(nm_svy)
 
 }
 
@@ -294,33 +272,33 @@ copy_dirs <- function(dirs,
 
 }
 
-
-gen_hh_pid <- function(fk_svy,
-                       n_obs,
-                       n_hh = round(n_obs/2)) {
-
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # computations   ---------
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-  # Runs a poison distribution with number of individuals per hh
-
-  #n_hh <- round(n_obs/2)
-  n_id_hh <- round(stats::rpois(n_hh, n_obs/n_hh))
-  n_id_hh <- rep(n_id_hh[n_id_hh!=0],4)
-
-  fk_svy <- fk_svy[
-    , hhid := rep(1:n_hh,times = n_id_hh[1:n_hh])[1:n_obs]
-  ][
-    , pid := data.table::rowidv(fk_svy, cols = "hhid")
-  ]
-
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Return   ---------
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  return(fk_svy)
-
-}
+#
+# gen_hh_pid <- function(fk_svy,
+#                        n_obs,
+#                        n_hh = round(n_obs/2)) {
+#
+#   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#   # computations   ---------
+#   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#   # Runs a poison distribution with number of individuals per hh
+#
+#   #n_hh <- round(n_obs/2)
+#   n_id_hh <- round(stats::rpois(n_hh, n_obs/n_hh))
+#   n_id_hh <- rep(n_id_hh[n_id_hh!=0],4)
+#
+#   fk_svy <- fk_svy[
+#     , hhid := rep(1:n_hh,times = n_id_hh[1:n_hh])[1:n_obs]
+#   ][
+#     , pid := data.table::rowidv(fk_svy, cols = "hhid")
+#   ]
+#
+#   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#   # Return   ---------
+#   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#   return(fk_svy)
+#
+# }
 
 gen_welf <- function(fk_svy,
                         w_vec,
