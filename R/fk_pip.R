@@ -302,6 +302,13 @@ copy_dirs <- function(dirs,
 #
 # }
 
+#' Function to generate a fake welfare vector
+#'
+#' @param fk_svy fake survey to attach the new vector
+#' @param w_vec weighted welfare vector
+#' @param n_obs number of observations of new vector
+#'
+#' @return data.base
 gen_welf <- function(fk_svy,
                         w_vec,
                         n_obs) {

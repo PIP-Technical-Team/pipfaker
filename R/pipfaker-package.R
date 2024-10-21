@@ -34,4 +34,5 @@ if(getRversion() >= "2.15.1")
                            'datt',
                            'hhid',
                            'pid',
-                           'name'))
+                           'name',
+                           'area'))
