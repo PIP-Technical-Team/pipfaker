@@ -179,7 +179,7 @@ fk_svy_gen <- function(svy,
 
   #Note: generate area according to percentage
 
-  if(!names(fk_svy) %in% c("area")){
+  if(!any(names(fk_svy) %in% c("area"))){
 
     area_tb <- prop.table(table(svy_org$area, useNA = "ifany"))
 
@@ -200,8 +200,8 @@ fk_svy_gen <- function(svy,
   w_vec <- svy_org$welfare[!is.na(svy_org$welfare)]
 
   fk_svy <- gen_welf(fk_svy,
-                        w_vec,
-                        n_hh)
+                     w_vec,
+                     n_obs)
 
   ### Weight (subject to change) ---------
 
@@ -301,31 +301,21 @@ copy_dirs <- function(dirs,
 
 gen_welf <- function(fk_svy,
                         w_vec,
-                        n_hh) {
+                        n_obs) {
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # computations   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  # Note: The sampling does not account for size of the household
-  # (larger households tend to have higher consumption/income) and
-  # it does not differentiate between consumption and income
-
   w_vec <- unique(w_vec)
   min_svy <- min(w_vec)
   lw_vec <- log(w_vec + 1 + abs(min_svy))
   lw_vec_sc <- scale(lw_vec)
-  lw_vec_smp <- sample(lw_vec_sc, n_hh, replace = TRUE)
+  lw_vec_smp <- sample(lw_vec_sc, n_obs, replace = TRUE)
   fk_w_vec <- exp(lw_vec_smp + 1 + abs(min_svy))
+  fk_w_vec <- data.frame(welfare = fk_w_vec)
 
-  fk_w_vec <- data.frame(hhid = c(1:n_hh),
-                         welfare = fk_w_vec)
-
-  fk_svy <- joyn::joyn(fk_svy, fk_w_vec,
-                       by = "hhid",
-                       match_type = "m:1",
-                       reportvar = FALSE,
-                       verbose = FALSE)
+  fk_svy <- collapse::add_vars(fk_svy, fk_w_vec)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Return   ---------
