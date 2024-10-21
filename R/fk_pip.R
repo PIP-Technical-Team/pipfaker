@@ -197,7 +197,9 @@ fk_svy_gen <- function(svy,
   # Welfare and Weight   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  w_vec <- svy_org$welfare[!is.na(svy_org$welfare)]
+  svy_org_nm <- svy_org[!is.na(svy_org$welfare),]
+
+  w_vec <- svy_org_nm$welfare*svy_org_nm$weight
 
   fk_svy <- gen_welf(fk_svy,
                      w_vec,
@@ -206,7 +208,8 @@ fk_svy_gen <- function(svy,
   ### Weight (subject to change) ---------
 
   fk_svy <- fk_svy[
-    , weight := 1/n_obs
+    , weight := 1/sum(svy_org$weight)
+    , by = area
   ]
 
 
