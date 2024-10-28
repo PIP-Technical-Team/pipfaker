@@ -80,16 +80,23 @@ fk_pip <- function(output_path = NULL,
 
     fs::dir_create(path = output_path, new_folders)
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Survey Data   ---------
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
     # input_path <- "E:/PIP/pipapi_data/20240627_2017_01_02_PROD"
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Add Survey Data   ---------
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     # Steps
-    # 1. Use list of surveys from the pipapi data folder.
+    # 1. Use list of surveys from the cache_inventory (20 surveys: 10 micro, 4 group, 6 bin).
+
+    svy_ls <- fk_svy_ls
+
     # 2. Create fake surveys with previous surveys names and fk
     # survey in the package.
+
+
+
+
     # 3. Add aux and estimations from package (Size is 5MB and 8MB)
 
 
