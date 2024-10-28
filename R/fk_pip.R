@@ -328,23 +328,23 @@ copy_dirs <- function(dirs,
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## Keep only qs and fst --------
 
-  if(dirs == "_aux"){
-
-    aux_ls <- fs::dir_ls(fs::path(output_path,
-                                  basename(input_path),
-                                  dirs))
-
-    lapply(aux_ls, del_files, ext_keep = "qs")
-
-  } else if (dirs == "estimations"){
-
-    est_ls <- fs::dir_ls(fs::path(output_path,
-                                  basename(input_path),
-                                  dirs))
-
-    lapply(est_ls, del_files, ext_keep = "fst")
-
-  }
+  # if(dirs == "_aux"){
+  #
+  #   aux_ls <- fs::dir_ls(fs::path(output_path,
+  #                                 basename(input_path),
+  #                                 dirs))
+  #
+  #   lapply(aux_ls, del_files, ext_keep = "fst") #Change from qs
+  #
+  # } else if (dirs == "estimations"){
+  #
+  #   est_ls <- fs::dir_ls(fs::path(output_path,
+  #                                 basename(input_path),
+  #                                 dirs))
+  #
+  #   lapply(est_ls, del_files, ext_keep = "fst")
+  #
+  # }
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Return   ---------
