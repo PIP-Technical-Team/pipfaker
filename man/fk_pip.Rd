@@ -4,12 +4,14 @@
 \alias{fk_pip}
 \title{Fake PIP data for API}
 \usage{
-fk_pip(output_path = NULL, input_path = NULL)
+fk_pip(output_path = NULL, input_path = NULL, n_obs = 400)
 }
 \arguments{
 \item{output_path}{where to create new folder}
 
 \item{input_path}{file address to the PIP API data. Default is..}
+
+\item{n_obs}{observations for micro surveys. Default is 400.}
 }
 \value{
 folder

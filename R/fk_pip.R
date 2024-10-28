@@ -116,12 +116,12 @@ fk_pip <- function(output_path = NULL,
 
 #' Function to write new fake survey in `survey_data` folder
 #'
-#' @param svy Input surveys. Default is `fk_svy_ls`
+#' @param svy Input surveys.
 #' @param n_obs Observations for fake survey
 #' @inheritParams fk_pip
 #'
 #' @return character name of survey
-fk_svy_gen <- function(svy = fk_svy_ls,
+fk_svy_gen <- function(svy,
                        n_obs = 400,
                        output_path,
                        input_path = NULL) {
@@ -148,6 +148,9 @@ fk_svy_gen <- function(svy = fk_svy_ls,
 
   if(!fs::file_exists(svy)){
 
+    output_path <- fs::path(output_path,
+             "20240627_2017_01_02_PROD")
+
     if(svy_inf$survey_type %in% c("GROUP", "BIN")){
 
       if(svy_inf$survey_type %in% c("BIN")){
@@ -173,9 +176,8 @@ fk_svy_gen <- function(svy = fk_svy_ls,
 
       fst::write_fst(fake_svy,
                      path = fs::path(output_path,
-                                     basename(input_path),
                                      "survey_data",
-                                     paste0(svy_name)))
+                                     paste0(svy_name,".fst")))
 
       return(nm_svy)
     }
@@ -184,15 +186,17 @@ fk_svy_gen <- function(svy = fk_svy_ls,
 
   }else{
 
+    output_path <- fs::path(output_path,
+                            basename(input_path))
+
     svy_org <- load_files_pip(svy)
 
   if(svy_inf$survey_type %in% c("GROUP","BIN")){
 
     fst::write_fst(svy_org,
                    path = fs::path(output_path,
-                                   basename(input_path),
                                    "survey_data",
-                                   paste0(svy_name)))
+                                   paste0(svy_name,".fst")))
 
     return(nm_svy)
   }
@@ -204,9 +208,8 @@ fk_svy_gen <- function(svy = fk_svy_ls,
 
     fst::write_fst(svy_org,
                    path = fs::path(output_path,
-                                   basename(input_path),
                                    "survey_data",
-                                   paste0(svy_name)))
+                                   paste0(svy_name,".fst")))
 
     cli::cli_alert_warning("The survey called {.val {svy_name}}
                            from {.path {input_path}} has only NA values.")
@@ -278,9 +281,8 @@ fk_svy_gen <- function(svy = fk_svy_ls,
 
   fst::write_fst(fk_svy,
                  path = fs::path(output_path,
-                                 basename(input_path),
                                  "survey_data",
-                                 paste0(svy_name)))
+                                 paste0(svy_name,".fst")))
 
   return(nm_svy)
 

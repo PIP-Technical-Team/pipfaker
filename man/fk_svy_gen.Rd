@@ -4,10 +4,10 @@
 \alias{fk_svy_gen}
 \title{Function to write new fake survey in `survey_data` folder}
 \usage{
-fk_svy_gen(svy, n_obs = 400, output_path, input_path)
+fk_svy_gen(svy, n_obs = 400, output_path, input_path = NULL)
 }
 \arguments{
-\item{svy}{Real survey}
+\item{svy}{Input surveys.}
 
 \item{n_obs}{Observations for fake survey}
 
