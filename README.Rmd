@@ -43,3 +43,18 @@ mean_welf <- mean(micro_cache_pip$welfare_ppp, w = micro_cache_pip$weight)
 mean_welf
 ```
 
+## For `pipapi`
+
+This package can be used to create fake data to test `pipapi`. You can provide an `input_path` to a reference folder you want to mimic. If `input_path` is not provided the `fk_pip` functions uses the fake data already installed within this package. The following example will save the new fake data into your working directory (`output_path`).
+
+```{r pipapi_ex}
+
+## basic example code for pipapi using input_path
+
+# fk_pip(output_path = ".", input_path =  "E:/PIP/pipapi_data/20240627_2017_01_02_PROD")
+
+## without input_path (using fake data)
+
+# fk_pip(output_path = ".")
+
+```

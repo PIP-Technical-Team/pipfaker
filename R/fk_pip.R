@@ -9,6 +9,7 @@
 #' @param n_obs observations for micro surveys. Default is 400.
 #'
 #' @return folder
+#' @export
 fk_pip <- function(output_path = NULL,
                    input_path = NULL,
                    n_obs = 400) {
