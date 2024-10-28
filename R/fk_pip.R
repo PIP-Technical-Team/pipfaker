@@ -94,7 +94,12 @@ fk_pip <- function(output_path = NULL,
     # 2. Create fake surveys with previous surveys names and fk
     # survey in the package.
 
-
+    svys <- sapply(svy_ls,
+                   fk_svy_gen,
+                   output_path = output_path,
+                   n_obs = n_obs,
+                   simplify = TRUE,
+                   USE.NAMES = FALSE)
 
 
     # 3. Add aux and estimations from package (Size is 5MB and 8MB)
@@ -111,15 +116,15 @@ fk_pip <- function(output_path = NULL,
 
 #' Function to write new fake survey in `survey_data` folder
 #'
-#' @param svy Real survey
+#' @param svy Input surveys. Default is `fk_svy_ls`
 #' @param n_obs Observations for fake survey
 #' @inheritParams fk_pip
 #'
 #' @return character name of survey
-fk_svy_gen <- function(svy,
+fk_svy_gen <- function(svy = fk_svy_ls,
                        n_obs = 400,
                        output_path,
-                       input_path) {
+                       input_path = NULL) {
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Identify survey type and load ---------
@@ -141,7 +146,45 @@ fk_svy_gen <- function(svy,
                           "survey_type"))
   ]
 
-  svy_org <- load_files_pip(svy)
+  if(!fs::file_exists(svy)){
+
+    if(svy_inf$survey_type %in% c("GROUP", "BIN")){
+
+      if(svy_inf$survey_type %in% c("BIN")){
+
+        svy_org <- fk_cache_bin[, c("welfare","weight","area")]
+
+        lw_vec <- wbpip::md_compute_lorenz(svy_org$welfare)
+
+        w_vec <- wbpip:::sd_create_synth_vector(lw_vec$lorenz_welfare,
+                                                lw_vec$lorenz_weight,
+                                                mean = collapse::fmean(svy_org$welfare))$welfare
+
+        fake_svy <- data.table(
+          welfare = wbpip::md_compute_quantiles(w_vec, n_quantile = 400),
+          weight = svy_org$weight,
+          area = svy_org$area)
+
+      }else{
+
+        fake_svy <- fk_cache_group_gen()
+
+      }
+
+      fst::write_fst(fake_svy,
+                     path = fs::path(output_path,
+                                     basename(input_path),
+                                     "survey_data",
+                                     paste0(svy_name)))
+
+      return(nm_svy)
+    }
+
+    svy_org <- fk_micro[, c("welfare","weight","area")]
+
+  }else{
+
+    svy_org <- load_files_pip(svy)
 
   if(svy_inf$survey_type %in% c("GROUP","BIN")){
 
@@ -152,6 +195,8 @@ fk_svy_gen <- function(svy,
                                    paste0(svy_name)))
 
     return(nm_svy)
+  }
+
   }
 
 
@@ -173,7 +218,7 @@ fk_svy_gen <- function(svy,
   # Generate fake survey   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  var_svy <- names(svy_org)
+  var_svy <- names(data.table::copy(svy_org))
 
   svy_org <- svy_org[
     , name := nm_svy
@@ -215,13 +260,16 @@ fk_svy_gen <- function(svy,
 
   ### Weight (subject to change) ---------
 
-  fk_svy <- fk_svy[
-    , weight := 1/sum(svy_org$weight)
-    , by = area
-  ]
+  if(!any(names(fk_svy) %in% c("weight"))){
 
+    fk_svy <- fk_svy[
+      , weight := 1/sum(svy_org$weight)
+      , by = area
+    ]
 
-  fk_svy <-  fk_svy|>
+  }
+
+  fk_svy <- fk_svy|>
     collapse::fselect(var_svy)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
