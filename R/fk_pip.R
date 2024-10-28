@@ -6,10 +6,12 @@
 #'
 #' @param output_path where to create new folder
 #' @param input_path file address to the PIP API data. Default is..
+#' @param n_obs observations for micro surveys. Default is 400.
 #'
 #' @return folder
 fk_pip <- function(output_path = NULL,
-                   input_path = NULL) {
+                   input_path = NULL,
+                   n_obs = 400) {
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Checks   ---------
@@ -53,9 +55,19 @@ fk_pip <- function(output_path = NULL,
                    fk_svy_gen,
                    output_path = output_path,
                    input_path = input_path,
-                   n_obs = 400,
+                   n_obs = n_obs,
                    simplify = TRUE,
                    USE.NAMES = FALSE)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Add Aux Files and Estimations  ---------
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    dirs <- list("_aux","estimations") # Make it soft coded
+
+    lapply(dirs, copy_dirs,
+           input_path = input_path,
+           output_path = output_path)
 
   }else{
 
@@ -72,27 +84,16 @@ fk_pip <- function(output_path = NULL,
     # Survey Data   ---------
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    input_path <- "E:/PIP/pipapi_data/20240627_2017_01_02_PROD"
+    # input_path <- "E:/PIP/pipapi_data/20240627_2017_01_02_PROD"
 
-    svy_ls <- fs::dir_ls(fs::path(input_path,"survey_data"))
+    # Steps
+    # 1. Use list of surveys from the pipapi data folder.
+    # 2. Create fake surveys with previous surveys names and fk
+    # survey in the package.
+    # 3. Add aux and estimations from package (Size is 5MB and 8MB)
 
-    svys <- sapply(svy_ls,
-                   fk_svy_gen, output_path = output_path,
-                   input_path = input_path,
-                   n_obs = 400,
-                   simplify = TRUE,
-                   USE.NAMES = FALSE)
+
   }
-
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Add Aux Files and Estimations  ---------
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-  dirs <- list("_aux","estimations") # Make it soft coded
-
-  lapply(dirs, copy_dirs,
-         input_path = input_path,
-         output_path = output_path)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Return   ---------
