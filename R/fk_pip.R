@@ -178,7 +178,7 @@ fk_svy_gen <- function(svy,
       fst::write_fst(fake_svy,
                      path = fs::path(output_path,
                                      "survey_data",
-                                     paste0(svy_name,".fst")))
+                                     svy_name))
 
       return(nm_svy)
     }
@@ -197,7 +197,7 @@ fk_svy_gen <- function(svy,
     fst::write_fst(svy_org,
                    path = fs::path(output_path,
                                    "survey_data",
-                                   paste0(svy_name,".fst")))
+                                   svy_name))
 
     return(nm_svy)
   }
@@ -210,7 +210,7 @@ fk_svy_gen <- function(svy,
     fst::write_fst(svy_org,
                    path = fs::path(output_path,
                                    "survey_data",
-                                   paste0(svy_name,".fst")))
+                                   svy_name))
 
     cli::cli_alert_warning("The survey called {.val {svy_name}}
                            from {.path {input_path}} has only NA values.")
@@ -283,7 +283,7 @@ fk_svy_gen <- function(svy,
   fst::write_fst(fk_svy,
                  path = fs::path(output_path,
                                  "survey_data",
-                                 paste0(svy_name,".fst")))
+                                 svy_name))
 
   return(nm_svy)
 
