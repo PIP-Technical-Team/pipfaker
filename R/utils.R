@@ -102,3 +102,29 @@ ignore_unused_imports <- function() {
   dplyr::across
   rlang::.data
 }
+
+#' Delete files that do not have an specific extension
+#'
+#' @param orig_file File location
+#' @param ext_keep extension to be kept in the folder
+#'
+#' @return none
+del_files <- function(orig_file,
+                      ext_keep) {
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # computations   ---------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ext <- orig_file |>
+    fs::path_ext()
+
+  if (ext != ext_keep) {
+    fs::file_delete(orig_file)
+  }
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Return   ---------
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  return(invisible(TRUE))
+
+}
