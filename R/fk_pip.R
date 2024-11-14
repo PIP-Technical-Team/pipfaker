@@ -297,11 +297,14 @@ fk_svy_gen <- function(svy,
 #'
 #' @param dirs Name of the directory to be copy
 #' @inheritParams fk_pip
+#' @param ext If only one extension is needed. Examples are "fst","qs" or "dta".
+#'
 #'
 #' @return TRUE
 copy_dirs <- function(dirs,
                       output_path,
-                      input_path) {
+                      input_path,
+                      ext = NULL) {
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # computations   ---------
@@ -327,25 +330,27 @@ copy_dirs <- function(dirs,
   }
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ## Keep only qs and fst --------
+  ## Keep only one extension is needed (qs or fst) --------
 
-  # if(dirs == "_aux"){
-  #
-  #   aux_ls <- fs::dir_ls(fs::path(output_path,
-  #                                 basename(input_path),
-  #                                 dirs))
-  #
-  #   lapply(aux_ls, del_files, ext_keep = "fst") #Change from qs
-  #
-  # } else if (dirs == "estimations"){
-  #
-  #   est_ls <- fs::dir_ls(fs::path(output_path,
-  #                                 basename(input_path),
-  #                                 dirs))
-  #
-  #   lapply(est_ls, del_files, ext_keep = "fst")
-  #
-  # }
+  if(!is.null(ext)){
+    if(dirs == "_aux"){
+
+      aux_ls <- fs::dir_ls(fs::path(output_path,
+                                    basename(input_path),
+                                    dirs))
+
+      lapply(aux_ls, del_files, ext_keep = ext)
+
+    } else if (dirs == "estimations"){
+
+      est_ls <- fs::dir_ls(fs::path(output_path,
+                                    basename(input_path),
+                                    dirs))
+
+      lapply(est_ls, del_files, ext_keep = ext)
+
+    }
+  }
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Return   ---------
