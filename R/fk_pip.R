@@ -105,11 +105,20 @@ fk_pip <- function(output_path = NULL,
 
     # 3. Add aux and estimations from package (Size is 5MB and 8MB)
 
-    ghf_info <- pipfun::get_file_info_from_gh(
+    pipfun::load_all_from_gh(
       owner     = getOption("pipfun.ghowner"),
       repo      = "pipfaker",
-      file_path = "data/20240627_2017_01_02_PROD/_aux/countries.fst",
-      branch    = "aux_estimations"
+      folder_path = "data/20240627_2017_01_02_PROD/_aux",
+      branch    = "aux_estimations",
+      output_path = fs::path(output_path,"_aux")
+    )
+
+    pipfun::load_all_from_gh(
+      owner     = getOption("pipfun.ghowner"),
+      repo      = "pipfaker",
+      folder_path = "data/20240627_2017_01_02_PROD/estimations",
+      branch    = "aux_estimations",
+      output_path = fs::path(output_path,"estimations")
     )
 
 
