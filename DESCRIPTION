@@ -20,10 +20,12 @@ Imports:
     fst,
     haven,
     joyn,
+    pipfun,
     pipload,
     qs,
     rlang,
     stats,
+    utils,
     wbpip,
     withr
 Suggests: 

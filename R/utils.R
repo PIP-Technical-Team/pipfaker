@@ -128,3 +128,28 @@ del_files <- function(orig_file,
   return(invisible(TRUE))
 
 }
+
+
+#' Test if specific branch is installed
+#'
+#' @param package_name Name of the package you want to test
+#' @param remote_ref Name of the branch you want to verify if it is installed
+#'
+#' @return alert
+#' @export
+is_remote_installed <- function(package_name,
+                                remote_ref) {
+
+  if (package_name %in% utils::installed.packages()[, "Package"]) {
+
+    package_info <- utils::packageDescription(package_name)
+
+    return(remote_ref == package_info$RemoteRef)
+
+  } else {
+
+    cli::cli_abort("Make sure to install {.pkg {package_name}}")
+
+  }
+
+}
