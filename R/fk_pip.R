@@ -104,9 +104,9 @@ fk_pip <- function(output_path = NULL,
     # 3. Add aux and estimations from branch
 
 
-    if(!is_remote_installed("pipfun","wrppr_load_fun")){
+    if(!is_remote_installed("pipfun","DEV_v2")){
 
-      branch_link <- "https://github.com/PIP-Technical-Team/pipfun/tree/wrppr_load_fun"
+      branch_link <- "https://github.com/PIP-Technical-Team/pipfun/tree/DEV_v2"
 
       cli::cli_abort(c("Make sure to install the remote {.url {branch_link}}
                      for the {.pkg pipfun} package",
