@@ -4,7 +4,7 @@
 \alias{copy_dirs}
 \title{Copy files from a folder}
 \usage{
-copy_dirs(dirs, output_path, input_path)
+copy_dirs(dirs, output_path, input_path, ext = NULL)
 }
 \arguments{
 \item{dirs}{Name of the directory to be copy}
@@ -12,6 +12,8 @@ copy_dirs(dirs, output_path, input_path)
 \item{output_path}{where to create new folder}
 
 \item{input_path}{file address to the PIP API data. Default is..}
+
+\item{ext}{If only one extension is needed. Examples are "fst","qs" or "dta".}
 }
 \value{
 TRUE

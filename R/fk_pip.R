@@ -21,18 +21,18 @@ fk_pip <- function(output_path = NULL,
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## Checks output path exists --------
 
-  # output_path <- "E:/PovcalNet/01.personal/wb535623/PIP/temp"
-
   if(is.null(output_path)){
 
-    cli::cli_abort("Please specify the output_path",wrap = TRUE)
+    cli::cli_abort("Please specify the output_path",
+                   wrap = TRUE)
 
   }
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## Alert for output path --------
 
-  cli::cli_alert_info("The fake PIP folder was created in {.path {output_path}}",wrap = TRUE)
+  cli::cli_alert_info("The fake PIP folder was created in {.path {output_path}}",
+                      wrap = TRUE)
 
   if(!is.null(input_path)){
 
@@ -81,8 +81,6 @@ fk_pip <- function(output_path = NULL,
 
     fs::dir_create(path = output_path, new_folders)
 
-    # input_path <- "E:/PIP/pipapi_data/20240627_2017_01_02_PROD"
-
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Add Survey Data   ---------
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -103,7 +101,35 @@ fk_pip <- function(output_path = NULL,
                    USE.NAMES = FALSE)
 
 
-    # 3. Add aux and estimations from package (Size is 5MB and 8MB)
+    # 3. Add aux and estimations from branch
+
+
+    if(!is_remote_installed("pipfun","DEV_v2")){
+
+      branch_link <- "https://github.com/PIP-Technical-Team/pipfun/tree/DEV_v2"
+
+      cli::cli_abort(c("Make sure to install the remote {.url {branch_link}}
+                     for the {.pkg pipfun} package",
+                       "i" = "You can use {.fn metapip::install_branch}"))
+                       # {.code {metapip::install_branch(`pipfun`, branch = `wrppr_load_fun`})}"))
+
+    }
+
+    pipfun::load_all_from_gh(
+      owner     = getOption("pipfun.ghowner"),
+      repo      = "pipfaker",
+      folder_path = "data/20240627_2017_01_02_PROD/_aux",
+      branch    = "aux_estimations",
+      output_path = fs::path(output_path,"20240627_2017_01_02_PROD","_aux")
+    )
+
+    pipfun::load_all_from_gh(
+      owner     = getOption("pipfun.ghowner"),
+      repo      = "pipfaker",
+      folder_path = "data/20240627_2017_01_02_PROD/estimations",
+      branch    = "aux_estimations",
+      output_path = fs::path(output_path,"20240627_2017_01_02_PROD","estimations")
+    )
 
 
   }
@@ -297,11 +323,13 @@ fk_svy_gen <- function(svy,
 #'
 #' @param dirs Name of the directory to be copy
 #' @inheritParams fk_pip
+#' @param ext If only one extension is needed. Examples are "fst","qs" or "dta".
 #'
 #' @return TRUE
 copy_dirs <- function(dirs,
                       output_path,
-                      input_path) {
+                      input_path,
+                      ext = NULL) {
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # computations   ---------
@@ -327,30 +355,32 @@ copy_dirs <- function(dirs,
   }
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ## Keep only qs and fst --------
+  ## Keep only one extension is needed (qs or fst) --------
 
-  # if(dirs == "_aux"){
-  #
-  #   aux_ls <- fs::dir_ls(fs::path(output_path,
-  #                                 basename(input_path),
-  #                                 dirs))
-  #
-  #   lapply(aux_ls, del_files, ext_keep = "fst") #Change from qs
-  #
-  # } else if (dirs == "estimations"){
-  #
-  #   est_ls <- fs::dir_ls(fs::path(output_path,
-  #                                 basename(input_path),
-  #                                 dirs))
-  #
-  #   lapply(est_ls, del_files, ext_keep = "fst")
-  #
-  # }
+  if(!is.null(ext)){
+    if(dirs == "_aux"){
+
+      aux_ls <- fs::dir_ls(fs::path(output_path,
+                                    basename(input_path),
+                                    dirs))
+
+      lapply(aux_ls, del_files, ext_keep = ext)
+
+    } else if (dirs == "estimations"){
+
+      est_ls <- fs::dir_ls(fs::path(output_path,
+                                    basename(input_path),
+                                    dirs))
+
+      lapply(est_ls, del_files, ext_keep = ext)
+
+    }
+  }
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Return   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  return(TRUE)
+  return(invisible(TRUE))
 
 }
 
