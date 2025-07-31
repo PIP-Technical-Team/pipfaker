@@ -1,8 +1,8 @@
 ---
-title: "pipfaker: An R package to access and generate fake PIP data"
+title: "pipfaker: generate fake PIP data"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{pipfaker}
+  %\VignetteIndexEntry{pipfaker: generate fake PIP data}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 
 # Background
 
-This package is develop for users who would like to use (or generate) fake PIP data in several formats (raw or cache) and for different distribution types (micro, group, bin or imputed).
+This package is develop for users who would like to use (or generate) fake PIP data in several formats (raw or cache) and for different distribution types (micro, group, bin or imputed). Also, the package has a main 
 
 ```{r setup}
 library(pipfaker)
@@ -35,7 +35,7 @@ mean_welf
 
 ## Cache data
 
-The fake data set called `fk_micro` was generated using 20 random surveys from `pip_inventory` (see `fk_micro_gen()`). This is an example of how it can be used:
+The fake data set called `fk_cache_micro` was generated using 20 random surveys from `pip_inventory` (see `fk_cache_micro_gen()`). This is an example of how it can be used:
 
 ```{r cache}
 micro_cache_pip <- fk_cache_micro
@@ -43,3 +43,19 @@ micro_cache_pip <- fk_cache_micro
 mean_welf <- mean(micro_cache_pip$welfare_ppp, w = micro_cache_pip$weight)
 mean_welf
 ```
+
+This can be replicated for group, bin and imputed data with: `fk_cache_group`, `fk_cache_bin`, and `fk_cache_imputed`.
+
+## PIP folders
+
+This package also includes a function to recreates a fake (and smaller) version of the PIP release folder that includes PIP `estimations`, `_aux` and `survey_data`. It can be recreated either by using data from a specific release folder path (input_path) or using the fixed fake data incorporated in the package.
+
+```{r pip}
+# Without input path
+fk_pip(output_path = getwd())
+unlink("20240627_2017_01_02_PROD", recursive = TRUE)
+
+# With input path (DO NOT TEST --> Still need checking)
+# fk_pip(output_path = getwd(), input_path = "E:\PIP\pipapi_data\20240627_2017_01_02_PROD") 
+```
+
