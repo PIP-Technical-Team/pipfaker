@@ -18,12 +18,19 @@ fk_pip <- function(output_path = NULL,
   # Checks   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+  # input_path <- "E:/PIP/pipapi_data/20240627_2017_01_02_PROD"
+
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## Checks output path exists --------
 
   if(is.null(output_path)){
 
     cli::cli_abort("Please specify the output_path",
+                   wrap = TRUE)
+
+  }else if(!dir.exists(output_path)){
+
+    cli::cli_abort("Please make sure {.path {output_path}} is a valid path",
                    wrap = TRUE)
 
   }
@@ -40,8 +47,8 @@ fk_pip <- function(output_path = NULL,
     # Create empty folders   ---------
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    new_folders <- file.path(basename(input_path),
-                            basename(fs::dir_ls(input_path,
+    new_folders <- file.path(fs::path_file(input_path),
+                             fs::path_file(fs::dir_ls(input_path,
                                                 type = "directory")))
 
     fs::dir_create(path = output_path, new_folders)
@@ -94,7 +101,7 @@ fk_pip <- function(output_path = NULL,
     # survey in the package.
 
     svys <- sapply(svy_ls,
-                   fk_svy_gen,
+                   fk_svy_gen_load,
                    output_path = output_path,
                    n_obs = n_obs,
                    simplify = TRUE,
@@ -111,7 +118,6 @@ fk_pip <- function(output_path = NULL,
       cli::cli_abort(c("Make sure to install the remote {.url {branch_link}}
                      for the {.pkg pipfun} package",
                        "i" = "You can use {.fn metapip::install_branch}"))
-                       # {.code {metapip::install_branch(`pipfun`, branch = `wrppr_load_fun`})}"))
 
     }
 
@@ -148,7 +154,7 @@ fk_pip <- function(output_path = NULL,
 #' @inheritParams fk_pip
 #'
 #' @return character name of survey
-fk_svy_gen <- function(svy,
+fk_svy_gen_load <- function(svy,
                        n_obs = 400,
                        output_path,
                        input_path = NULL) {
@@ -157,12 +163,12 @@ fk_svy_gen <- function(svy,
   # Identify survey type and load ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  # svy <- svy_ls[[2]]
-
-  svy_name <- basename(svy)
+  # Get name of survey
+  svy_name <- fs::path_file(svy)
 
   nm_svy <- tools::file_path_sans_ext(svy_name)
 
+  # Save survey information
   svy_inf <- data.table::setDT(as.data.frame(nm_svy))[
     , data.table::tstrsplit(nm_svy, "_",
                 names = c("country_code",
@@ -214,7 +220,7 @@ fk_svy_gen <- function(svy,
   }else{
 
     output_path <- fs::path(output_path,
-                            basename(input_path))
+                            fs::path_file(input_path))
 
     svy_org <- load_files_pip(svy)
 
@@ -337,7 +343,7 @@ copy_dirs <- function(dirs,
 
   fs::dir_copy(path = fs::path(input_path,dirs),
                new_path = fs::path(output_path,
-                                   basename(input_path),
+                                   fs::path_file(input_path),
                                    dirs),
                overwrite = TRUE)
 
@@ -345,7 +351,7 @@ copy_dirs <- function(dirs,
   ## Remove _vintage folder --------
 
   vintage_path <- fs::path(output_path,
-                           basename(input_path),
+                           fs::path_file(input_path),
                            dirs,"_vintage")
 
   if(fs::dir_exists(vintage_path)){
@@ -361,7 +367,7 @@ copy_dirs <- function(dirs,
     if(dirs == "_aux"){
 
       aux_ls <- fs::dir_ls(fs::path(output_path,
-                                    basename(input_path),
+                                    fs::path_file(input_path),
                                     dirs))
 
       lapply(aux_ls, del_files, ext_keep = ext)
@@ -369,7 +375,7 @@ copy_dirs <- function(dirs,
     } else if (dirs == "estimations"){
 
       est_ls <- fs::dir_ls(fs::path(output_path,
-                                    basename(input_path),
+                                    fs::path_file(input_path),
                                     dirs))
 
       lapply(est_ls, del_files, ext_keep = ext)
