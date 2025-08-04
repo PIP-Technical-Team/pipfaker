@@ -16,8 +16,17 @@ fk_cache_group_gen <- function(n_quantiles = 20) {
   orig_file       <- cache_inventory[cache_id=="IND_1983_NSS_D2_CON_GROUP","cache_file"]|>
     as.character()
 
-  svy_ind         <- load_files_pip(orig_file)
-  svy_ind_rural   <- svy_ind[svy_ind$reporting_level=="rural",]
+  if(file.exists(orig_file)){
+
+    svy_ind         <- load_files_pip(orig_file)
+    svy_ind_rural   <- svy_ind[svy_ind$reporting_level=="rural",]
+
+  }else{
+
+    svy_ind_rural   <- fk_cache_group
+
+  }
+
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Create new dataset   ---------
