@@ -4,10 +4,12 @@
 \alias{fk_cache_group_gen}
 \title{Fake data generator for cache group}
 \usage{
-fk_cache_group_gen(n_quantiles = 20)
+fk_cache_group_gen(n_quantiles = 20, path = NULL)
 }
 \arguments{
 \item{n_quantiles}{number of quantiles of data.table. Default is 20.}
+
+\item{path}{path for original file}
 }
 \value{
 data.table

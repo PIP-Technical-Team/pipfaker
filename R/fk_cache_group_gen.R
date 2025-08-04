@@ -4,21 +4,23 @@
 #' generated using the Indian rural data from 1983 (Datt, 1998).
 #'
 #' @param n_quantiles number of quantiles of data.table. Default is 20.
+#' @param path path for original file
 #'
 #' @return data.table
-fk_cache_group_gen <- function(n_quantiles = 20) {
+fk_cache_group_gen <- function(n_quantiles = 20,
+                               path = NULL) {
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Load IND 1983   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  cache_inventory <- pipload::pip_load_cache_inventory(version = "20240326_2017_01_02_PROD")
-  orig_file       <- cache_inventory[cache_id=="IND_1983_NSS_D2_CON_GROUP","cache_file"]|>
-    as.character()
+  # cache_inventory <- pipload::pip_load_cache_inventory(version = "20240326_2017_01_02_PROD")
+  # orig_file       <- cache_inventory[cache_id=="IND_1983_NSS_D2_CON_GROUP","cache_file"]|>
+  #   as.character()
 
-  if(file.exists(orig_file)){
+  if(file.exists(path)){
 
-    svy_ind         <- load_files_pip(orig_file)
+    svy_ind         <- load_files_pip(path)
     svy_ind_rural   <- svy_ind[svy_ind$reporting_level=="rural",]
 
   }else{
