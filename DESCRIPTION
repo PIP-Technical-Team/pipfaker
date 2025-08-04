@@ -1,7 +1,7 @@
 Package: pipfaker
 Type: Package
 Title: Fake data for PIP packages
-Version: 0.2.0
+Version: 0.2.1
 Author: Diana C. Garcia Rojas
 Maintainer: The package maintainer <dgarciarojas@worldbank.org>
 Description: This packages includes and generates fake data for different stages of the PIP pipeline. These are the types of data you can use...
