@@ -14,9 +14,9 @@ fk_cache_group_gen <- function(n_quantiles = 20,
   # Load IND 1983   ---------
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  cache_inventory <- pipload::pip_load_cache_inventory(version = "20240326_2017_01_02_PROD")
-  orig_file       <- cache_inventory[cache_id=="IND_1983_NSS_D2_CON_GROUP","cache_file"]|>
-    as.character()
+  # cache_inventory <- pipload::pip_load_cache_inventory(version = "20240326_2017_01_02_PROD")
+  # orig_file       <- cache_inventory[cache_id=="IND_1983_NSS_D2_CON_GROUP","cache_file"]|>
+  #   as.character()
 
   if(!is.null(path)){
 
