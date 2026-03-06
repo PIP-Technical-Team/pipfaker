@@ -38,19 +38,43 @@ mean_welf
 
 ## For `pipapi`
 
-This package can be used to create fake data to test `pipapi`. You can
-provide an `input_path` to a reference folder you want to mimic. If
-`input_path` is not provided the `fk_pip` functions uses the fake data
-already installed within this package. The following example will save
-the new fake data into your working directory (`output_path`).
+This package can be used to create fake data to test `pipapi`. There are
+two approaches:
+
+### Using `fk_pip_ref()` (recommended)
+
+`fk_pip_ref()` takes a reference PIP folder and creates a synthetic copy
+that mirrors its structure. It synthesises `survey_data` and
+`lineup_data` files using quantile-remapping (preserving weighted means
+per area/reporting level), copies `_GROUP`/`_BIN` files directly, and
+copies `_aux`, `estimations`, and root files verbatim. The `pct`
+argument controls the fraction of rows to generate (e.g. `0.1` for 10%).
 
 ``` r
+# Synthesise from a reference folder at 10% sample size
+fk_pip_ref(
+  input_path  = "E:/PIP/pipapi_data/20240627_2017_01_02_PROD",
+  output_path = "path/to/output",
+  pct         = 0.1
+)
 
-## basic example code for pipapi using input_path
+# Full-size synthetic copy (default pct = 1)
+fk_pip_ref(
+  input_path  = "E:/PIP/pipapi_data/20240627_2017_01_02_PROD",
+  output_path = "path/to/output"
+)
+```
 
-# fk_pip(output_path = ".", input_path =  "E:/PIP/pipapi_data/20240627_2017_01_02_PROD")
+### Using `fk_pip()` (legacy)
 
-## without input_path (using fake data)
+`fk_pip()` can generate fake data either from a reference folder or
+using the bundled fake datasets included in this package. If
+`input_path` is not provided, `fk_pip()` uses the pre-built fake data.
 
+``` r
+## Using input_path
+# fk_pip(output_path = ".", input_path = "E:/PIP/pipapi_data/20240627_2017_01_02_PROD")
+
+## Without input_path (using bundled fake data)
 # fk_pip(output_path = ".")
 ```
