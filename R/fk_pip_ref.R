@@ -13,18 +13,32 @@
 #'   created. Will be created if it does not exist.
 #' @param pct Numeric in (0, 1]. Fraction of original rows to generate for each
 #'   synthesised file. Default is `1` (same number of rows as original).
+#' @param parallel Logical. If `TRUE`, synthesises `survey_data` and
+#'   `lineup_data` files in parallel using `future.apply::future_lapply()`.
+#'   Requires the `future.apply` package and a `future::plan()` set by the
+#'   user before calling. Default is `FALSE`.
 #'
 #' @return The output path (invisibly).
 #' @export
 fk_pip_ref <- function(input_path,
                        output_path,
-                       pct = 1) {
+                       pct = 1,
+                       parallel = FALSE) {
 
   # ---- Validation --------------------------------------------------------
 
 
   if (!is.numeric(pct) || length(pct) != 1 || pct <= 0 || pct > 1) {
     cli::cli_abort("{.arg pct} must be a single number in (0, 1].")
+  }
+
+  if (!is.logical(parallel) || length(parallel) != 1) {
+    cli::cli_abort("{.arg parallel} must be a single logical value.")
+  }
+
+  if (isTRUE(parallel)) {
+    rlang::check_installed("future.apply",
+                           reason = "to use parallel processing in fk_pip_ref()")
   }
 
   if (!dir.exists(input_path)) {
@@ -110,29 +124,33 @@ fk_pip_ref <- function(input_path,
 
     if (length(svy_files) > 0) {
 
-      cli::cli_progress_bar("Synthesising survey_data",
-                            total = length(svy_files))
-
-      for (f in svy_files) {
-
+      # Helper to process one survey file
+      process_svy <- function(f) {
         fname <- fs::path_file(f)
-
-        # Detect GROUP or BIN suffix right before extension
         is_group_bin <- grepl("_(GROUP|BIN)\\.[^.]+$", fname,
                               ignore.case = FALSE)
-
         if (is_group_bin) {
-          # Copy directly
           fs::file_copy(f, fs::path(svy_out, fname), overwrite = TRUE)
         } else {
-          # Synthesise
           synth_svy_file(file_path = f, output_dir = svy_out, pct = pct)
         }
-
-        cli::cli_progress_update()
+        invisible(fname)
       }
 
-      cli::cli_progress_done()
+      if (isTRUE(parallel)) {
+        cli::cli_alert_info("Synthesising survey_data in parallel...")
+        future.apply::future_lapply(svy_files, process_svy,
+                                    future.seed = TRUE)
+      } else {
+        cli::cli_progress_bar("Synthesising survey_data",
+                              total = length(svy_files))
+        for (f in svy_files) {
+          process_svy(f)
+          cli::cli_progress_update()
+        }
+        cli::cli_progress_done()
+      }
+
       cli::cli_alert_success("Processed {length(svy_files)} survey_data file{?s}")
     }
   }
@@ -150,15 +168,26 @@ fk_pip_ref <- function(input_path,
 
     if (length(lineup_files) > 0) {
 
-      cli::cli_progress_bar("Synthesising lineup_data",
-                            total = length(lineup_files))
-
-      for (f in lineup_files) {
+      # Helper to process one lineup file
+      process_lineup <- function(f) {
         synth_lineup_file(file_path = f, output_dir = lineup_out, pct = pct)
-        cli::cli_progress_update()
+        invisible(fs::path_file(f))
       }
 
-      cli::cli_progress_done()
+      if (isTRUE(parallel)) {
+        cli::cli_alert_info("Synthesising lineup_data in parallel...")
+        future.apply::future_lapply(lineup_files, process_lineup,
+                                    future.seed = TRUE)
+      } else {
+        cli::cli_progress_bar("Synthesising lineup_data",
+                              total = length(lineup_files))
+        for (f in lineup_files) {
+          process_lineup(f)
+          cli::cli_progress_update()
+        }
+        cli::cli_progress_done()
+      }
+
       cli::cli_alert_success(
         "Processed {length(lineup_files)} lineup_data file{?s}"
       )

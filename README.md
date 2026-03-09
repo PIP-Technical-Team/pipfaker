@@ -50,6 +50,8 @@ per area/reporting level), copies `_GROUP`/`_BIN` files directly, and
 copies `_aux`, `estimations`, and root files verbatim. The `pct`
 argument controls the fraction of rows to generate (e.g. `0.1` for 10%).
 
+#### Sequential (default) mode:
+
 ``` r
 # Synthesise from a reference folder at 10% sample size
 fk_pip_ref(
@@ -63,6 +65,30 @@ fk_pip_ref(
   input_path  = "E:/PIP/pipapi_data/20240627_2017_01_02_PROD",
   output_path = "path/to/output"
 )
+```
+
+#### Parallel mode:
+
+For large reference folders, use parallel processing to speed up
+synthesis of `survey_data` and `lineup_data` files. This requires the
+`future` package and a configured plan.
+
+``` r
+library(future)
+
+# Set a parallel plan (e.g., multisession with 4 workers)
+plan(multisession, workers = 4)
+
+# Synthesise with parallel = TRUE
+fk_pip_ref(
+  input_path  = "E:/PIP/pipapi_data/20240627_2017_01_02_PROD",
+  output_path = "path/to/output",
+  pct         = 0.1,
+  parallel    = TRUE
+)
+
+# Reset to sequential plan
+plan(sequential)
 ```
 
 ### Using `fk_pip()` (legacy)

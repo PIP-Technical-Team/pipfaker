@@ -4,7 +4,7 @@
 \alias{fk_pip_ref}
 \title{Generate synthetic PIP data from a reference folder}
 \usage{
-fk_pip_ref(input_path, output_path, pct = 1)
+fk_pip_ref(input_path, output_path, pct = 1, parallel = FALSE)
 }
 \arguments{
 \item{input_path}{Character. Path to the reference PIP folder containing
@@ -15,6 +15,11 @@ created. Will be created if it does not exist.}
 
 \item{pct}{Numeric in (0, 1]. Fraction of original rows to generate for each
 synthesised file. Default is `1` (same number of rows as original).}
+
+\item{parallel}{Logical. If `TRUE`, synthesises `survey_data` and
+`lineup_data` files in parallel using `future.apply::future_lapply()`.
+Requires the `future.apply` package and a `future::plan()` set by the
+user before calling. Default is `FALSE`.}
 }
 \value{
 The output path (invisibly).

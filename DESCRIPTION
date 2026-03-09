@@ -29,6 +29,8 @@ Imports:
     wbpip,
     withr
 Suggests: 
+    future.apply,
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat (>= 3.0.0)
 VignetteBuilder: knitr
