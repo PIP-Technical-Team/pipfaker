@@ -114,12 +114,18 @@ fk_pip_ref <- function(input_path,
       }
 
       # Copy all files (recursively) preserving subfolder placement
-      all_files <- all_files[!grepl("/_vintage/", all_files)]
+      all_files <- fs::dir_ls(src, type = "file", recurse = TRUE)
       if (length(all_files) > 0) {
         rel_files <- fs::path_rel(all_files, start = src)
         fs::file_copy(all_files,
                       fs::path(dst, rel_files),
                       overwrite = TRUE)
+      }
+
+      # Remove _vintage subfolder if present
+      vintage <- fs::path(dst, "_vintage")
+      if (fs::dir_exists(vintage)) {
+        fs::dir_delete(vintage)
       }
 
       cli::cli_alert_success("Copied {.path {d}} (including all subfolders)")
