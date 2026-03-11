@@ -183,8 +183,8 @@ pipfaker::fk_pip_ref(
 - [x] Verify all 59 expectations pass
 - [x] Update README.Rmd with usage examples
 - [x] Sync README.md with Rmd changes
-- [ ] Run `devtools::check()` (optional; Step 19 of plan)
-- [ ] Manual smoke test with real reference folder (optional; Step 20 of plan)
+- [x] Run `devtools::check()` (optional; Step 19 of plan)
+- [x] Manual smoke test with real reference folder (optional; Step 20 of plan)
 
 ---
 

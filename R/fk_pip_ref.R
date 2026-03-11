@@ -1,11 +1,12 @@
 #' Generate synthetic PIP data from a reference folder
 #'
 #' Takes a reference PIP API folder and creates a synthetic copy that mirrors
-#' its structure. Folders `_aux` and `estimations` are copied verbatim. Root
-#' files are copied except `cache.duckdb`. Survey micro files are synthesised
-#' using quantile-remapping (preserving per-area weighted mean); files ending in
-#' `_GROUP` or `_BIN` are copied directly. Lineup files are synthesised with
-#' distribution-preserving quantile interpolation.
+#' its structure. Folders `_aux` and `estimations` are copied verbatim 
+#' (except the subfolder `_vintage`). Root files are copied except `cache.duckdb`.
+#' Survey micro files are synthesised using quantile-remapping 
+#' (preserving per-area weighted mean); files ending in `_GROUP` or `_BIN` are 
+#' copied directly. Lineup files are synthesised with distribution-preserving 
+#' quantile interpolation.
 #'
 #' @param input_path Character. Path to the reference PIP folder containing
 #'   subfolders such as `_aux`, `estimations`, `survey_data`, `lineup_data`.
@@ -63,7 +64,25 @@ fk_pip_ref <- function(input_path,
 
   # ---- Create output root ------------------------------------------------
 
-  fs::dir_create(output_path)
+  # Check if output_path exists
+  if (fs::dir_exists(output_path)) {
+    # List existing files in the output directory
+    existing_files <- fs::dir_ls(output_path, all = TRUE)
+
+    if (length(existing_files) > 0) {
+      # Option 3: Update the folder
+      cli::cli_alert_info("Updating the contents of the existing output_path '{output_path}'.")
+
+      # Remove only files that will be replaced (if applicable)
+      # fs::file_delete(existing_files) # Uncomment if you want to delete specific files
+
+      # Proceed with the update logic (e.g., overwrite files or add new ones)
+      # Add your file update logic here
+    }
+  } else {
+    # Create the output directory if it doesn't exist
+    fs::dir_create(output_path)
+  }
 
   cli::cli_alert_info("Creating synthetic PIP folder in {.path {output_path}}")
 
@@ -137,9 +156,7 @@ fk_pip_ref <- function(input_path,
     fs::dir_create(svy_out)
 
     svy_files <- fs::dir_ls(svy_dir, type = "file")
-    # Only keep supported file extensions
-    #svy_files <- svy_files[tolower(fs::path_ext(svy_files)) %in% c("qs", "fst", "dta")]
-
+    
     if (length(svy_files) > 0) {
 
       # Helper to process one survey file

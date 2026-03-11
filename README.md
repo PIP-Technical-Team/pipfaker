@@ -47,7 +47,7 @@ two approaches:
 that mirrors its structure. It synthesises `survey_data` and  
 `lineup_data` files using quantile-remapping (preserving weighted means  
 per area/reporting level), copies `_GROUP`/`_BIN` files directly, and  
-copies `_aux`, `estimations`, and root files verbatim (except `cache.duckdb`).  
+copies `_aux`, `estimations`, (except subfolder `_vintage`), and root files verbatim (except `cache.duckdb`).  
 The `pct` argument controls the fraction of rows to generate (e.g. `0.1` for 10%). 
 
 #### Sequential (default) mode:
