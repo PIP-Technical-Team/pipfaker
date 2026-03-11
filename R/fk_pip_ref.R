@@ -48,9 +48,14 @@ fk_pip_ref <- function(input_path,
 
   # ---- Guard against output_path being a child of input_path -----------
 
-  # Normalize paths to absolute form to prevent symlink/relative path tricks
-  abs_input <- normalizePath(input_path, winslash = "/", mustWork = TRUE)
-  abs_output <- normalizePath(output_path, winslash = "/", mustWork = FALSE)
+  # Normalize paths to absolute form and remove trailing slashes
+  abs_input <- sub("/+$", "", normalizePath(input_path, winslash = "/", mustWork = TRUE))
+  abs_output <- sub("/+$", "", normalizePath(output_path, winslash = "/", mustWork = FALSE))
+
+  # Ensure abs_output is absolute if it looks relative
+  if (!grepl("^(?:[A-Za-z]:/|/)", abs_output)) {
+    abs_output <- sub("/+$", "", normalizePath(file.path(getwd(), abs_output), winslash = "/", mustWork = FALSE))
+  }
 
   # Check if output is the same as input
   if (identical(abs_input, abs_output)) {
@@ -58,7 +63,7 @@ fk_pip_ref <- function(input_path,
   }
 
   # Check if output is a descendant of input (child/grandchild, etc.)
-  if (grepl(paste0("^", utils::glob2rx(paste0(abs_input, "/*"))), abs_output)) {
+  if (startsWith(abs_output, paste0(abs_input, "/"))) {
     cli::cli_abort("Cannot create synthetic folder: {.arg output_path} cannot be a subdirectory of {.arg input_path}.")
   }
 
@@ -73,11 +78,6 @@ fk_pip_ref <- function(input_path,
       # Option 3: Update the folder
       cli::cli_alert_info("Updating the contents of the existing output_path '{output_path}'.")
 
-      # Remove only files that will be replaced (if applicable)
-      # fs::file_delete(existing_files) # Uncomment if you want to delete specific files
-
-      # Proceed with the update logic (e.g., overwrite files or add new ones)
-      # Add your file update logic here
     }
   } else {
     # Create the output directory if it doesn't exist
@@ -114,18 +114,12 @@ fk_pip_ref <- function(input_path,
       }
 
       # Copy all files (recursively) preserving subfolder placement
-      all_files <- fs::dir_ls(src, type = "file", recurse = TRUE)
+      all_files <- all_files[!grepl("/_vintage/", all_files)]
       if (length(all_files) > 0) {
         rel_files <- fs::path_rel(all_files, start = src)
         fs::file_copy(all_files,
                       fs::path(dst, rel_files),
                       overwrite = TRUE)
-      }
-
-      # Remove _vintage subfolder if present
-      vintage <- fs::path(dst, "_vintage")
-      if (fs::dir_exists(vintage)) {
-        fs::dir_delete(vintage)
       }
 
       cli::cli_alert_success("Copied {.path {d}} (including all subfolders)")

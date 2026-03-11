@@ -26,9 +26,10 @@ The output path (invisibly).
 }
 \description{
 Takes a reference PIP API folder and creates a synthetic copy that mirrors
-its structure. Folders `_aux` and `estimations` are copied verbatim. Root
-files are copied except `cache.duckdb`. Survey micro files are synthesised
-using quantile-remapping (preserving per-area weighted mean); files ending in
-`_GROUP` or `_BIN` are copied directly. Lineup files are synthesised with
-distribution-preserving quantile interpolation.
+its structure. Folders `_aux` and `estimations` are copied verbatim 
+(except the subfolder `_vintage`). Root files are copied except `cache.duckdb`.
+Survey micro files are synthesised using quantile-remapping 
+(preserving per-area weighted mean); files ending in `_GROUP` or `_BIN` are 
+copied directly. Lineup files are synthesised with distribution-preserving 
+quantile interpolation.
 }
