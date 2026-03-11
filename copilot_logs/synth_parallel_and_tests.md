@@ -99,7 +99,7 @@ Successfully implemented parallel synthetic data generation with quantile-remapp
 - Status: ✅ Generated successfully via `make_fixtures.R`
 
 ### Documentation Generation
-```
+```text
 devtools::document()
 → Writing fk_pip_ref.Rd
 → Writing synth_welfare_qmap.Rd
@@ -212,7 +212,7 @@ pipfaker::fk_pip_ref(
 
 ## Appendix: File Structure
 
-```
+```text
 pipfaker/
 ├── R/
 │   ├── synth_helpers.R [NEW, 212 lines]
