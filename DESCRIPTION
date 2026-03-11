@@ -5,7 +5,7 @@ Version: 0.3.0
 Author: Diana C. Garcia Rojas
 Maintainer: The package maintainer <dgarciarojas@worldbank.org>
 Description: This packages includes and generates fake data for different stages of the PIP pipeline. These are the types of data you can use...
-License: MIT + file LICENSE
+License: MIT + file LICENSE.md
 Encoding: UTF-8
 LazyData: true
 Depends: 

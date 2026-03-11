@@ -71,7 +71,7 @@ fk_pip_ref(
 
 For large reference folders, use parallel processing to speed up
 synthesis of `survey_data` and `lineup_data` files. This requires the
-`future` package and a configured plan.
+`future.apply` package and a configured plan.
 
 ``` r
 library(future)

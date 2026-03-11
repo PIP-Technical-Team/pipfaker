@@ -28,12 +28,12 @@ fk_pip_ref <- function(input_path,
   # ---- Validation --------------------------------------------------------
 
 
-  if (!is.numeric(pct) || length(pct) != 1 || pct <= 0 || pct > 1) {
-    cli::cli_abort("{.arg pct} must be a single number in (0, 1].")
+  if (!is.numeric(pct) || length(pct) != 1 || is.na(pct) || !is.finite(pct) || pct <= 0 || pct > 1) {
+    cli::cli_abort("{.arg pct} must be a single finite number in (0, 1].")
   }
 
-  if (!is.logical(parallel) || length(parallel) != 1) {
-    cli::cli_abort("{.arg parallel} must be a single logical value.")
+  if (!is.logical(parallel) || length(parallel) != 1 || is.na(parallel)) {
+    cli::cli_abort("{.arg parallel} must be a single logical value (TRUE or FALSE, not NA).")
   }
 
   if (isTRUE(parallel)) {
@@ -43,6 +43,22 @@ fk_pip_ref <- function(input_path,
 
   if (!dir.exists(input_path)) {
     cli::cli_abort("The reference folder {.path {input_path}} does not exist.")
+  }
+
+  # ---- Guard against output_path being a child of input_path -----------
+
+  # Normalize paths to absolute form to prevent symlink/relative path tricks
+  abs_input <- normalizePath(input_path, winslash = "/", mustWork = TRUE)
+  abs_output <- normalizePath(output_path, winslash = "/", mustWork = FALSE)
+
+  # Check if output is the same as input
+  if (identical(abs_input, abs_output)) {
+    cli::cli_abort("Cannot create synthetic folder: {.arg output_path} is the same as {.arg input_path}.")
+  }
+
+  # Check if output is a descendant of input (child/grandchild, etc.)
+  if (grepl(paste0("^", utils::glob2rx(paste0(abs_input, "/*"))), abs_output)) {
+    cli::cli_abort("Cannot create synthetic folder: {.arg output_path} cannot be a subdirectory of {.arg input_path}.")
   }
 
   # ---- Create output root ------------------------------------------------
