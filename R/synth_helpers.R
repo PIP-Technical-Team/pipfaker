@@ -112,17 +112,20 @@ synth_svy_file <- function(file_path, output_dir, pct) {
 
   # --- carry forward other columns (scalar / constant columns) ----------
   other_cols <- setdiff(orig_names, c("welfare", "weight", "area"))
-
+  actual_nrow <- nrow(synth_core)
+  
   if (length(other_cols) > 0) {
     # For each non-core column, check if it has a single unique value
     # If so, replicate it; otherwise resample from original
     for (col in other_cols) {
       uvals <- unique(dt[[col]])
       if (length(uvals) == 1L) {
-        data.table::set(synth_core, j = col, value = rep(uvals, n_obs))
+        #data.table::set(synth_core, j = col, value = rep(uvals, n_obs))
+        data.table::set(synth_core, j = col, value = rep(uvals, actual_nrow))
       } else {
         # Resample from original, preserving type
-        sampled <- sample(dt[[col]], size = n_obs, replace = TRUE)
+        #sampled <- sample(dt[[col]], size = n_obs, replace = TRUE)
+        sampled <- sample(dt[[col]], size = actual_nrow, replace = TRUE)
         data.table::set(synth_core, j = col, value = sampled)
       }
     }
@@ -157,41 +160,57 @@ synth_svy_file <- function(file_path, output_dir, pct) {
 #' @return The output file path (invisibly).
 #' @keywords internal
 synth_lineup_file <- function(file_path, output_dir, pct) {
-
   dt <- load_files_pip(file_path)
 
   orig_names <- names(dt)
-  n_orig     <- nrow(dt)
-  n_obs      <- max(1L, ceiling(n_orig * pct))
+  n_orig <- nrow(dt)
+  n_obs <- max(1L, ceiling(n_orig * pct))
 
   # --- synthesise welfare/weight/reporting_level -------------------------
-  synth_core <- synth_welfare_qmap(dt, grp_col = "reporting_level",
-                                   n_obs = n_obs)
+  synth_core <- synth_welfare_qmap(
+    dt,
+    grp_col = "reporting_level",
+    n_obs = n_obs
+  )
 
   # Sort by reporting_level and welfare for cumulative computations
   data.table::setorderv(synth_core, c("reporting_level", "welfare"))
 
   # --- recompute derived columns from synthetic welfare ------------------
-  synth_core[, `:=`(
-    cw     = weight,
-    cwy    = weight * welfare,
-    cwy2   = weight * welfare * welfare,
-    cwylog = log(pmax(welfare, 1e-10)) * weight,
-    index  = seq_len(.N) - 1L
-  ), by = reporting_level]
+  synth_core[,
+    `:=`(
+      cw = weight,
+      cwy = weight * welfare,
+      cwy2 = weight * welfare * welfare,
+      cwylog = log(pmax(welfare, 1e-10)) * weight,
+      index = seq_len(.N) - 1L
+    ),
+    by = reporting_level
+  ]
 
   # --- carry forward any remaining columns ------------------------------
-  known_cols <- c("welfare", "weight", "reporting_level",
-                  "cw", "cwy", "cwy2", "cwylog", "index")
+  known_cols <- c(
+    "welfare",
+    "weight",
+    "reporting_level",
+    "cw",
+    "cwy",
+    "cwy2",
+    "cwylog",
+    "index"
+  )
   other_cols <- setdiff(orig_names, known_cols)
+  actual_nrow <- nrow(synth_core)
 
   if (length(other_cols) > 0) {
     for (col in other_cols) {
       uvals <- unique(dt[[col]])
       if (length(uvals) == 1L) {
-        data.table::set(synth_core, j = col, value = rep(uvals, n_obs))
+        #data.table::set(synth_core, j = col, value = rep(uvals, n_obs))
+        data.table::set(synth_core, j = col, value = rep(uvals, actual_nrow))
       } else {
-        sampled <- sample(dt[[col]], size = n_obs, replace = TRUE)
+        #sampled <- sample(dt[[col]], size = n_obs, replace = TRUE)
+        sampled <- sample(dt[[col]], size = actual_nrow, replace = TRUE) 
         data.table::set(synth_core, j = col, value = sampled)
       }
     }

@@ -121,6 +121,8 @@ fk_pip_ref <- function(input_path,
     fs::dir_create(svy_out)
 
     svy_files <- fs::dir_ls(svy_dir, type = "file")
+    # Only keep supported file extensions
+    #svy_files <- svy_files[tolower(fs::path_ext(svy_files)) %in% c("qs", "fst", "dta")]
 
     if (length(svy_files) > 0) {
 

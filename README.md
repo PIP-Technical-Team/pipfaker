@@ -43,12 +43,12 @@ two approaches:
 
 ### Using `fk_pip_ref()` (recommended)
 
-`fk_pip_ref()` takes a reference PIP folder and creates a synthetic copy
-that mirrors its structure. It synthesises `survey_data` and
-`lineup_data` files using quantile-remapping (preserving weighted means
-per area/reporting level), copies `_GROUP`/`_BIN` files directly, and
-copies `_aux`, `estimations`, and root files verbatim. The `pct`
-argument controls the fraction of rows to generate (e.g. `0.1` for 10%).
+`fk_pip_ref()` takes a reference PIP folder and creates a synthetic copy  
+that mirrors its structure. It synthesises `survey_data` and  
+`lineup_data` files using quantile-remapping (preserving weighted means  
+per area/reporting level), copies `_GROUP`/`_BIN` files directly, and  
+copies `_aux`, `estimations`, and root files verbatim (except `cache.duckdb`).  
+The `pct` argument controls the fraction of rows to generate (e.g. `0.1` for 10%). 
 
 #### Sequential (default) mode:
 
